@@ -18,7 +18,7 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
 <html lang="en">
 <head>
   <meta content="Welcome to the Hull Seals, Elite Dangerous's Premier Hull Repair Specialists!" name="description">
- <title>Drill Paperwork List | The Hull Seals</title>
+ <title>Paperwork List | The Hull Seals</title>
  <meta content="David Sangrey" name="author">
  <?php include '../assets/includes/headerCenter.php'; ?>
  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js" integrity="sha384-1CmrxMRARb6aLqgBO7yyAxTOQE2AKb9GfXnEo760AUcUmFx3ibVJJAzGytlQcNXd" crossorigin="anonymous"></script>
