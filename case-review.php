@@ -191,7 +191,7 @@ $stmtAssigned->close();
          <h4>Cyberseal Access:</h4>
        <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a>
      <?php } else {?>
-       <h4>To modify incorrect information, please contact the CyberSeals.</h4>
+       <h4>To modify incorrect information, please <a class="btn btn-small btn-primary" href="mailto:cyberseals@hullseals.space?subject=Case%20Edit%20Request&body=Edit%20requested%20to%20case%20<?php echo"$beingManaged" ?>!" target="_blank">contact the CyberSeals.</a></h4>
      <?php }?>
        <br>
        <p><a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
