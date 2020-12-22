@@ -183,7 +183,12 @@ $stmtAssigned->close();
          ?>
        </tbody>
        </table>
+       <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+         <h4>Cyberseal Access:</h4>
+       <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a>
+     <?php } else {?>
        <h4>To modify incorrect information, please contact the CyberSeals.</h4>
+     <?php }?>
        <br>
        <p><a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
        <br>
