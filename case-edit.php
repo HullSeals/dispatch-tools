@@ -40,6 +40,9 @@ $stmtCaseInfo->execute();
 $resultCaseInfo = $stmtCaseInfo->get_result();
 $stmtCaseInfo->close();
 //$rowCaseInfo = $resultCaseInfo->fetch_assoc();
+if($resultCaseInfo->num_rows === 0) {
+  Redirect::to('cases-list.php');
+}
 //All Assigned Seals
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
 AS

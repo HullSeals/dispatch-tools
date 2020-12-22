@@ -33,6 +33,10 @@ $stmtCaseInfo->bind_param("i", $beingManaged);
 $stmtCaseInfo->execute();
 $resultCaseInfo = $stmtCaseInfo->get_result();
 $stmtCaseInfo->close();
+if($resultCaseInfo->num_rows === 0) {
+  Redirect::to('cases-list.php');
+}
+
 //$rowCaseInfo = $resultCaseInfo->fetch_assoc();
 //All Assigned Seals
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
