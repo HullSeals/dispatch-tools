@@ -54,39 +54,37 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
       </thead>
       <tbody>
         <?php
-        $stmt = $mysqli->prepare("WITH sealsCTI
-AS
-(
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
-)
-SELECT c.case_ID, seal_name, client_nm, current_sys, platform_name, case_created
-FROM sealsCTI AS cti
-    JOIN case_assigned AS ca ON ca.seal_kf_id = cti.seal_ID
-    JOIN cases AS c ON c.case_ID = ca.case_ID
-    JOIN case_seal AS cs ON cs.case_ID = c.case_ID
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
-WHERE ca.dispatch IS FALSE AND ca.support IS FALSE");
-        $stmt->execute();
-        $result = $stmt->get_result();
-        while ($row = $result->fetch_assoc()) {
-          $field1name = $row["case_ID"];
-          $field2name = $row["client_nm"];
-          $field3name = $row["current_sys"];
-          $field4name = $row["platform_name"];
-          $field5name = $row["case_created"];
-          echo '<tr>
-            <td>'.$field1name.'</td>
-            <td>'.$field2name.'</td>
-            <td>'.$field3name.'</td>
-            <td>'.$field4name.'</td>
-            <td>'.$field5name.'</td>
-            <td><a href="case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Case</a></td>
-          </tr>';
-        }
-        $result->free();
-        ?>
+$stmt = $mysqli->prepare("SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf
+FROM cases AS c
+    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform");
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+  $field1name = $row["case_ID"];
+  $field2name = $row["client_nm"];
+  $field3name = $row["current_sys"];
+  $field4name = $row["platform_name"];
+  $field5name = $row["case_created"];
+  $field6name = 'Coming Soon';//$row["primary_seal"];
+  echo '<tr>
+    <td>'.$field1name.'</td>
+    <td>'.$field2name.'</td>
+    <td>'.$field6name.'</td>
+    <td>'.$field3name.'</td>
+    <td>'.$field4name.'</td>
+    <td>'.$field5name.'</td>';
+if ($row["hs_kf"]==2) {
+echo  '<td><a href="#" class="btn btn-secondary disabled">KF Case</a></td>';
+}
+else {
+echo  '<td><a href="case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Case</a></td>';
+
+}
+  echo '</tr>';
+}
+$result->free();
+?>
+
       </tbody>
       </table>
     </article>
