@@ -106,6 +106,7 @@ $stmtAssigned->close();
           <th>Canopy Status</th>
           <th>Hull Status</th>
           <th>Case Color</th>
+          <th>Case Status</th>
       </tr>
     </thead>
     <tbody>
@@ -122,6 +123,7 @@ $stmtAssigned->close();
         }
         echo '<td>'.$rowCaseInfo["hull_stat"].'</td>
         <td>'.$rowCaseInfo["color_name"].'</td>
+        <td>'.$rowCaseInfo["status_name"].'</td>
        </tr>';
       ?>
     </tbody>
