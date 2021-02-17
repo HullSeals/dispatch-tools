@@ -29,7 +29,7 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     $db = include 'db.php';
     $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], $db['db'], $db['port']);
-    $stmt = $mysqli->prepare("SELECT ID, delayed_name, case_text, last_updated, updated_by FROM casestatus JOIN lookups.delayed_lu ON delayed_id = case_status WHERE case_status != 3");
+    $stmt = $mysqli->prepare("SELECT ID, delayed_name, case_text, last_updated, updated_by FROM casestatus JOIN lookups.delayed_lu ON delayed_id = case_status WHERE case_status != 3 ORDER BY ID ASC");
     $stmt->execute();
     $result = $stmt->get_result();
     echo "<h3>Returning all Pending Cases: ";
