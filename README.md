@@ -15,6 +15,8 @@ This repository houses all of the files required to build and host your own vers
 ## Usage
 To install, download the latest [release](https://gitlab.com/hull-seals/code/website-subsections/dispatcher-tools/-/releases) from our repository. Upload and extract the files to the directory or subdirectory you wish to install from, and add or change the information in db.php to fit your server. Ensure that you have created Stored Procedures and have the appropriate tables. Due to security risks, our own example tables are not provided.
 
+This collection of pages was designed to be used in tandem with our HalpyBOT IRC Bot.
+
 ## Troubleshooting
 - Upon installation, be sure to replace the information in db.php to match your own details, or create the file if no such file exists.
 - Additionally, be sure to create a database and tables, and method of creating, updating, and removing data. It is encouraged to use Stored Procedures for this task.
@@ -26,7 +28,7 @@ The best way to receive support is through the issues section of this repository
 If for some reason you are unable to do so, emailing us at Code[at]hullseals[dot]space will also reach the same team.
 
 # Roadmap
-In the short term, the only major known change upcoming is the establishment of site-wide assets such as headers and footers to standardize some aspects of code, and changing the aspect view to use a center article design.
+No complete roadmap has been created for this project yet.
 
 As always, bugfixes, speed, and stability updates are priorities as discovered, as well as general enhancements over time.
 
@@ -44,4 +46,4 @@ Layout design by [Wolfii Namakura](https://gitlab.com/wolfii1), implemented by [
 This project is governed under the [GNU General Public License v3.0](LICENSE) license.
 
 # Project Status
-This project is in a BETA state, with structural changes upcoming. Mind the dust - this is being updated frequently.
+This project is in a ALPHA state, and most features have not been implemented. Please pardon the mess as we develop this project.

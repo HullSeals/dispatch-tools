@@ -25,9 +25,11 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
         <br>
         <h3>Dispatcher Resources</h3>
       <div class="btn-group" style="display:flex;" role="group">
-        <a href="active.php" class="btn btn-lg btn-primary disabled" style="max-width: 33%;">Active Cases</a>
-        <button type="button" class="btn btn-secondary disabled" style="max-width: 33%;"></button>
-        <a href="cases-list.php" class="btn btn-lg btn-primary" style="max-width: 33%;">Case Review</a>
+        <a href="active.php" class="btn btn-lg btn-primary disabled" style="max-width: 20%;">Active Cases</a>
+        <button type="button" class="btn btn-secondary disabled" style="max-width: 20%;"></button>
+        <a href="delayed" class="btn btn-lg btn-primary" style="max-width: 20%;">Delayed Cases</a>
+        <button type="button" class="btn btn-secondary disabled" style="max-width: 20%;"></button>
+        <a href="cases-list.php" class="btn btn-lg btn-primary" style="max-width: 20%;">Case Review</a>
       </div>
       </article>
             <div class="clearfix"></div>
