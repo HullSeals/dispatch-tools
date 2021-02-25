@@ -17,6 +17,14 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 <title>Delayed Case Status | The Hull Seals</title>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 <?php include '../../assets/includes/headerCenter.php'; ?>
+<style>
+.modal-body{
+  word-break: break-all;
+}
+.baconator {
+	word-break: break-all;
+}
+</style>
 </head>
 <body>
     <div id="home">
@@ -50,13 +58,13 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
         while ($row = $result->fetch_assoc()) {
             $field1name = $row["ID"];
             $field2name = $row["delayed_name"];
-            $field3name = $row["case_text"];
+            $field3name = strip_tags($row["case_text"]);
             $field4name = $row["last_updated"];
             $field5name = $row["updated_by"];
             echo '<tr>
                       <td>'.$field1name.'</td>
                       <td>'.$field2name.'</td>
-                      <td>';
+                      <td class="baconator">';
                       if (strlen($field3name) > 200) {
                         echo '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#MO'.$field1name.'">Notes Too Large. Overflowed...</button>';
                         echo '<div class="modal fade" id="MO'.$field1name.'" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
