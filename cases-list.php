@@ -46,6 +46,7 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
         <tr>
             <th>Case ID</th>
             <th>Client</th>
+            <th>Seal</th>
             <th>System</th>
             <th>Platform</th>
             <th>Date</th>
@@ -74,10 +75,10 @@ while ($row = $result->fetch_assoc()) {
     <td>'.$field4name.'</td>
     <td>'.$field5name.'</td>';
 if ($row["hs_kf"]==2) {
-echo  '<td><a href="#" class="btn btn-secondary disabled">KF Case</a></td>';
+  echo  '<td><a href="fisher-review.php?cne='.$field1name.'" class="btn btn-info active">Review KF Case</a></td>';
 }
 else {
-echo  '<td><a href="case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Case</a></td>';
+echo  '<td><a href="case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Seal Case</a></td>';
 
 }
   echo '</tr>';
