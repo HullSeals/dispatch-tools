@@ -55,9 +55,19 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
       </thead>
       <tbody>
         <?php
-$stmt = $mysqli->prepare("SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf
+$stmt = $mysqli->prepare("WITH sealsCTI
+AS
+(
+    SELECT MIN(ID), seal_ID, seal_name
+    FROM sealsudb.staff
+    GROUP BY seal_ID
+)
+SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf, seal_name
 FROM cases AS c
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform");
+    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
+    JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
+    LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
+    WHERE dispatch = FALSE AND support = FALSE OR dispatch = TRUE AND support = FALSE GROUP BY c.case_ID;");
 $stmt->execute();
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
@@ -66,7 +76,7 @@ while ($row = $result->fetch_assoc()) {
   $field3name = $row["current_sys"];
   $field4name = $row["platform_name"];
   $field5name = $row["case_created"];
-  $field6name = 'Coming Soon';//$row["primary_seal"];
+  $field6name = $row["seal_name"];
   echo '<tr>
     <td>'.$field1name.'</td>
     <td>'.$field2name.'</td>
