@@ -14,6 +14,9 @@ if (!isset($_GET['cne'])) {
 $beingManaged = $_GET['cne'];
 $beingManaged = intval($beingManaged);
 
+//IP Tracking Stuff
+require '../assets/includes/ipinfo.php';
+
 //DB Info
 $db = include 'db.php';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -56,6 +59,16 @@ $resultAssigned = $stmtAssigned->get_result();
 $stmtAssigned->close();
 //$rowAssigned = $resultAssigned->fetch_assoc();
 
+if (isset($_GET['del'])) {
+    foreach ($_REQUEST as $key => $value) {
+        $lore[$key] = strip_tags(stripslashes(str_replace(["'", '"'], '', $value)));
+    }
+      $stmt = $mysqli->prepare('CALL spDeleteCase(?,?,?,?)');
+      $stmt->bind_param('iiss', $beingManaged, $user->data()->id, $lore['notes'], $lgd_ip);
+      $stmt->execute();
+      $stmt->close();
+  header("Location: cases-list.php");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -183,7 +196,26 @@ $stmtAssigned->close();
        </table>
        <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
          <h4>Cyberseal Access:</h4>
-       <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a>
+       <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a> <button class="btn btn-danger btn-small" data-target="#moDel" data-toggle="modal" type="button">Mark Case for Deletion</button>
+	<div aria-hidden="true" class="modal fade" id="moDel" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel" style="color:black;">Mark Case for Deletion</h5><button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body" style="color:black;">
+					<form action="?del&cne=<?php echo $beingManaged; ?>" method="post">
+						<div class="input-group mb-3">
+		            <textarea aria-label="Notes (Required)" class="form-control" name="notes" placeholder="Reason for Deletion (Required)" required rows="5" style="color:black;"><?= $data['notes'] ?? '' ?></textarea>
+						</div>
+						<div class="modal-footer">
+							<button class="btn btn-primary" type="submit">Submit</button><button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
      <?php } else {?>
        <h4>To modify incorrect information, please <a class="btn btn-small btn-primary" href="mailto:cyberseals@hullseals.space?subject=Case%20Edit%20Request&body=Edit%20requested%20to%20case%20<?php echo"$beingManaged" ?>!" target="_blank">contact the CyberSeals.</a></h4>
      <?php }?>
