@@ -49,9 +49,9 @@ AS
     FROM sealsudb.staff
     GROUP BY seal_ID
 )
-SELECT seal_name, dispatch, support, self_dispatch
+SELECT COALESCE(seal_name, CONCAT('SEAL ID ', seal_kf_id), 'MISSING INFORMATION') AS seal_name, dispatch, support, self_dispatch
 FROM case_assigned AS ca
-    JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
+    LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
 WHERE case_ID = ?;");
 $stmtAssigned->bind_param("i", $beingManaged);
 $stmtAssigned->execute();
