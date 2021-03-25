@@ -38,7 +38,7 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
       <section class="introduction container">
     <article id="intro3">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>. Here are the cases you've been on...</h2>
-      <p><a href="." class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
+      <p><a href="https://hullseals.space/seal-links/" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
       <br>
       <br>
       <table class="table table-hover table-dark table-responsive-md table-bordered table-striped" id="PaperworkList">
@@ -85,10 +85,10 @@ while ($row = $result->fetch_assoc()) {
     <td>'.$field4name.'</td>
     <td>'.$field5name.'</td>';
 if ($row["hs_kf"]==2) {
-  echo  '<td><a href="fisher-review.php?cne='.$field1name.'" class="btn btn-info active">Review KF Case</a></td>';
+  echo  '<td><a href="my-fisher-review.php?cne='.$field1name.'" class="btn btn-info active">Review KF Case</a></td>';
 }
 else {
-echo  '<td><a href="case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Seal Case</a></td>';
+echo  '<td><a href="my-case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Seal Case</a></td>';
 
 }
   echo '</tr>';
