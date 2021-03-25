@@ -62,13 +62,13 @@ AS
     FROM sealsudb.staff
     GROUP BY seal_ID
 )
-SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf, seal_name
+SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf,  COALESCE(seal_name, (SELECT seal_name FROM case_assigned WHERE case_stat != 8 AND (dispatch = TRUE AND support = FALSE AND c.case_ID = case_ID)), 'ERROR') AS seal_name
 FROM cases AS c
     JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
     JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
     LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
     JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
-    WHERE case_stat != 8 AND (dispatch = FALSE AND support = FALSE OR dispatch = TRUE AND support = FALSE) GROUP BY c.case_ID;");
+    WHERE case_stat != 8 AND (dispatch = FALSE AND support = FALSE) GROUP BY c.case_ID");
 $stmt->execute();
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
