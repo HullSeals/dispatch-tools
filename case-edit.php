@@ -10,6 +10,8 @@ if (!isset($_GET['cne'])) {
   Redirect::to('cases-list.php');
 }
 
+require_once '../assets/includes/ipinfo.php';
+
 //Who are we working with?
 $beingManaged = $_GET['cne'];
 $beingManaged = intval($beingManaged);
@@ -27,7 +29,7 @@ while ($burgerking = $res->fetch_assoc())
 
 //All Case Info
 $stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name,
-    hull_stat, status_name, color_name, notes, case_created
+    hull_stat, status_name, color_name, notes, case_created, platform_id
 FROM cases AS c
     JOIN case_seal AS cs ON cs.case_ID = c.case_ID
     JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
@@ -60,7 +62,16 @@ $stmtAssigned->execute();
 $resultAssigned = $stmtAssigned->get_result();
 $stmtAssigned->close();
 //$rowAssigned = $resultAssigned->fetch_assoc();
-
+if (isset($_GET['updateinfo'])) {
+  foreach ($_REQUEST as $key => $value) {
+      $lore[$key] = strip_tags(stripslashes(str_replace(["'", '"'], '', $value)));
+  }
+  $stmt = $mysqli->prepare('CALL spUpdateCase(?,?,?,?,?,?,?,?,?)');
+  $stmt->bind_param('issiiiiss', $beingManaged, $lore['client_nm'], $lore['curr_sys'], $lore['canopy_status'], $lore['hull'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
+  $stmt->execute();
+  $stmt->close();
+header("Location: ?cne=$beingManaged");
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +86,7 @@ $stmtAssigned->close();
       <?php include '../assets/includes/menuCode.php';?>
       <section class="introduction container">
     <article id="intro3">
-      <form action="?send" method="post">
+      <form action="?updateinfo&cne=<?php echo $beingManaged; ?>" method="post">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
       <p>You are Editing Paperwork for Case # <?php echo $beingManaged;?> <a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
       <br>
@@ -96,18 +107,7 @@ $stmtAssigned->close();
           echo '<tr>
           <td><input aria-label="Client Name" class="form-control" name="client_nm" placeholder="Client Name" required="" type="text" value="'. $rowCaseInfo["client_nm"].'"></td>
           <td><input aria-label="System" class="form-control" name="curr_sys" placeholder="System" required="" type="text" value="'.$rowCaseInfo["current_sys"].'"></td>
-          <td><select class="custom-select" id="inputGroupSelect01" name="platypus" required="">
-          <option value="1"';
-          if ($rowCaseInfo["platform_name"] == "PC") { echo "selected"; }
-          echo '>PC</option>
-          <option value="2"';
-          if ($rowCaseInfo["platform_name"] == "XB1") { echo "selected"; }
-          echo '>Xbox</option>
-          <option value="3"';
-          if ($rowCaseInfo["platform_name"] == "PS4") { echo "selected"; }
-          echo '>PlayStation</option>
-          </select>
-          </td>
+          <td>'.$rowCaseInfo["platform_name"].'</td>
          </tr>';
         ?>
       </tbody>
@@ -190,12 +190,7 @@ $stmtAssigned->close();
   <tbody>
     <?php
       echo '<tr>
-        <td><textarea aria-label="Notes (Required)" minlength="10" class="form-control" name="notes" placeholder="Notes (Required).
-          Suggested notes include:
-          - Distance Traveled
-          - Unique or Unusual details about the repair
-          - Number of Limpets used, Client Ship Type, or other details." rows="5">'.$rowCaseInfo["notes"].'
-          </textarea>
+        <td><textarea aria-label="Notes (Required)" minlength="10" class="form-control" name="notes" rows="5">'.$rowCaseInfo["notes"].'</textarea>
         </td>
      </tr>';
     }
@@ -203,6 +198,9 @@ $stmtAssigned->close();
     ?>
   </tbody>
 </table>
+<button type="submit" class="btn btn-warning">Update Case Info</button>
+</form>
+
        <br>
        <h3>Responder Information</h3>
        <table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
@@ -246,8 +244,7 @@ $stmtAssigned->close();
          ?>
        </tbody>
        </table>
-     </form>
-     <p><button class="btn btn-primary" type="submit">Submit</button><a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
+     <p><a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
 
      <?php if(hasPerm([9,10],$user->data()->id)){?>
                 <hr><br><h3>Case Deletion</h3>
