@@ -66,8 +66,8 @@ if (isset($_GET['updateinfo'])) {
   foreach ($_REQUEST as $key => $value) {
       $lore[$key] = strip_tags(stripslashes(str_replace(["'", '"'], '', $value)));
   }
-  $stmt = $mysqli->prepare('CALL spUpdateCase(?,?,?,?,?,?,?,?,?)');
-  $stmt->bind_param('issiiiiss', $beingManaged, $lore['client_nm'], $lore['curr_sys'], $lore['canopy_status'], $lore['hull'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
+  $stmt = $mysqli->prepare('CALL spUpdateCase(?,?,?,?,?,?,?,?,?,?,?)');
+  $stmt->bind_param('iiissiiiiss', $beingManaged, $lore['status'], $lore['platform'], $lore['client_nm'], $lore['curr_sys'], $lore['canopy_status'], $lore['hull'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
   $stmt->execute();
   $stmt->close();
 header("Location: ?cne=$beingManaged");
@@ -107,7 +107,22 @@ header("Location: ?cne=$beingManaged");
           echo '<tr>
           <td><input aria-label="Client Name" class="form-control" name="client_nm" placeholder="Client Name" required="" type="text" value="'. $rowCaseInfo["client_nm"].'"></td>
           <td><input aria-label="System" class="form-control" name="curr_sys" placeholder="System" required="" type="text" value="'.$rowCaseInfo["current_sys"].'"></td>
-          <td>'.$rowCaseInfo["platform_name"].'</td>
+          <td>
+          <select class="custom-select" id="inputGroupSelect03" name="platform" required="">
+          <option value="1"';
+          if ($rowCaseInfo["platform_name"] == "PC - Odyssey") { echo "selected"; }
+          echo '>PC - Odyssey</option>
+          <option value="2"';
+          if ($rowCaseInfo["platform_name"] == "Xbox") { echo "selected"; }
+          echo '>Xbox</option>
+          <option value="3"';
+          if ($rowCaseInfo["platform_name"] == "PlayStation") { echo "selected"; }
+          echo '>PlayStation</option>
+          <option value="4"';
+          if ($rowCaseInfo["platform_name"] == "PC - Horizons") { echo "selected"; }
+          echo '>PC - Horizons</option>
+          </select>
+          </td>
          </tr>';
         ?>
       </tbody>
@@ -120,32 +135,28 @@ header("Location: ?cne=$beingManaged");
           <th>Canopy Status</th>
           <th>Hull Status</th>
           <th>Case Color</th>
+          <th>Case Status</th>
       </tr>
     </thead>
     <tbody>
       <?php
         echo '<tr>
-        <td><select class="custom-select" id="inputGroupSelect01" name="canopy_status" required="">';
-        if ($rowCaseInfo["canopy_breach"]==0) {
-          echo '<option value="0" selected>Intact</option>
-          <option value="1">Broken</option>';
-        }
-        elseif ($rowCaseInfo["canopy_breach"]==1) {
-          echo '<option value="0">Intact</option>
-          <option value="1" selected>Broken</option>';
-        }
-        else {
-          echo '<option value="0">Intact</option>
-          <option value="1">Broken</option>';
-        }
-        echo '</select>
+        <td>
+        <select class="custom-select" id="inputGroupSelect04" name="canopy_status" required="">
+        <option value="0"';
+        if ($rowCaseInfo["canopy_breach"] == 0) { echo "selected"; }
+        echo '>Intact</option>
+        <option value="1"';
+        if ($rowCaseInfo["canopy_breach"] == 1) { echo "selected"; }
+        echo '>Broken</option>
+        </select>
         </td>
         <td><input aria-label="Starting Hull %" class="form-control" max="100" min="1" name="hull" placeholder="Starting Hull %" required="" type="number" value="'.$rowCaseInfo["hull_stat"].'"></td>
         <td>
         <select class="custom-select" id="inputGroupSelect01" name="color" required="">
         <option value="1"';
         if ($rowCaseInfo["color_name"] == "Green") { echo "selected"; }
-        echo '>Green</option>l
+        echo '>Green</option>
         <option value="2"';
         if ($rowCaseInfo["color_name"] == "Amber") { echo "selected"; }
         echo '>Amber</option>
@@ -173,6 +184,28 @@ header("Location: ?cne=$beingManaged");
         <option value="11"';
         if ($rowCaseInfo["color_name"] == "Pick") { echo "selected"; }
         echo '>Pick</option>
+        </select>
+        </td>
+        <td>
+        <select class="custom-select" id="inputGroupSelect02" name="status" required="">
+        <option value="2"';
+        if ($rowCaseInfo["status_name"] == "Closed - Successful") { echo "selected"; }
+        echo '>Closed - Successful</option>
+        <option value="3"';
+        if ($rowCaseInfo["status_name"] == "Closed - Failed") { echo "selected"; }
+        echo '>Closed - Failed</option>
+        <option value="4"';
+        if ($rowCaseInfo["status_name"] == "Closed - Redirected") { echo "selected"; }
+        echo '>Closed - Redirected</option>
+        <option value="5"';
+        if ($rowCaseInfo["status_name"] == "Closed - Other") { echo "selected"; }
+        echo '>Closed - Other</option>
+        <option value="6"';
+        if ($rowCaseInfo["status_name"] == "Closed - False Case") { echo "selected"; }
+        echo '>Closed - False Case</option>
+        <option value="8"';
+        if ($rowCaseInfo["status_name"] == "Delete Case") { echo "selected"; }
+        echo '>Delete Case</option>
         </select>
         </td>
        </tr>';
