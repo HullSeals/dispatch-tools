@@ -196,7 +196,7 @@ if (isset($_GET['del'])) {
        </table>
        <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
          <h4>Cyberseal Access:</h4>
-       <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a> <button class="btn btn-danger btn-small" data-target="#moDel" data-toggle="modal" type="button">Mark Case for Deletion</button>
+       <a href="fisher-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a> <button class="btn btn-danger btn-small" data-target="#moDel" data-toggle="modal" type="button">Mark Case for Deletion</button>
 	<div aria-hidden="true" class="modal fade" id="moDel" tabindex="-1">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">

@@ -88,7 +88,7 @@ header("Location: ?cne=$beingManaged");
     <article id="intro3">
       <form action="?updateinfo&cne=<?php echo $beingManaged; ?>" method="post">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
-      <p>You are Editing Paperwork for Case # <?php echo $beingManaged;?> <a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
+      <p>You are Editing Paperwork for Case # <?php echo $beingManaged;?> <a href="case-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
       <br>
       <h3>Case Info</h3>
       <br>
@@ -172,18 +172,6 @@ header("Location: ?cne=$beingManaged");
         <option value="6"';
         if ($rowCaseInfo["color_name"] == "Teal") { echo "selected"; }
         echo '>Teal</option>
-        <option value="8"';
-        if ($rowCaseInfo["color_name"] == "Lift") { echo "selected"; }
-        echo '>Lift</option>
-        <option value="9"';
-        if ($rowCaseInfo["color_name"] == "Golf") { echo "selected"; }
-        echo '>Golf</option>
-        <option value="10"';
-        if ($rowCaseInfo["color_name"] == "Puck") { echo "selected"; }
-        echo '>Puck</option>
-        <option value="11"';
-        if ($rowCaseInfo["color_name"] == "Pick") { echo "selected"; }
-        echo '>Pick</option>
         </select>
         </td>
         <td>
@@ -277,39 +265,8 @@ header("Location: ?cne=$beingManaged");
          ?>
        </tbody>
        </table>
-     <p><a href="cases-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
+     <p><a href="case-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
 
-     <?php if(hasPerm([9,10],$user->data()->id)){?>
-                <hr><br><h3>Case Deletion</h3>
-                <p>
-<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#staticBackdrop">
-  Delete This Case
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel" style="color:black;">Delete This Case</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" style="color:black;">
-        Yes, I really want to delete this case from the Database.
-      </div>
-      <div class="modal-footer">
-        <form action="?del" method="post">
-          <input type="hidden" name="numberedt" value=<?php echo"$beingManaged" ?> required>
-        	 <button type="submit" class="btn btn-danger">Yes, Remove.</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-</p>
-              <?php }?>
        <br>
     </article>
     <div class="clearfix"></div>
