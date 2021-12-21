@@ -188,7 +188,7 @@ if (isset($_GET['del'])) {
   ?>
 </tbody>
 </table>
-<?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+<?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
 <br>
 <h5>Reviewer Notes</h5>
 <table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
@@ -253,7 +253,7 @@ $resultCaseInfo->free();
          ?>
        </tbody>
        </table>
-       <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+       <?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
          <h4>Review Access:</h4>
        <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a> <button class="btn btn-danger btn-small" data-target="#moDel" data-toggle="modal" type="button">Mark Case for Deletion</button>
 	<div aria-hidden="true" class="modal fade" id="moDel" tabindex="-1">

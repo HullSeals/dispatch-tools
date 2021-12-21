@@ -93,7 +93,7 @@ header("Location: ?cne=$beingManaged");
     <article id="intro3">
       <form action="?updateinfo&cne=<?php echo $beingManaged; ?>" method="post">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
-      <p>You are Editing Paperwork for Case # <?php echo $beingManaged;?> <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+      <p>You are Editing Paperwork for Case # <?php echo $beingManaged;?> <?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
         <br><br><strong>Review Access:</strong>
       <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?> <a href="case-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
       <br>
@@ -329,7 +329,7 @@ header("Location: ?cne=$beingManaged");
          ?>
        </tbody>
        </table>
-     <p><?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+     <p><?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
        <strong>Review Access:</strong>
      <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?><a href="case-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
 

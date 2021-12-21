@@ -89,7 +89,7 @@ header("Location: ?cne=$beingManaged");
     <article id="intro3">
       <form action="?updateinfo&cne=<?php echo $beingManaged; ?>" method="post">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
-      <p>You are Reviewing Paperwork for Case # <?php echo $beingManaged;?> <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+      <p>You are Reviewing Paperwork for Case # <?php echo $beingManaged;?> <?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
         <br><br><strong>Review Access:</strong>
       <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?> <a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
       <br>
@@ -262,7 +262,7 @@ header("Location: ?cne=$beingManaged");
 </table>
 
 
-<button type="submit" class="btn btn-warning">Update Case Info</button>
+<button type="submit" class="btn btn-warning">Update Case and Review Info</button>
 </form>
        <br>
        <h3>Responder Information</h3>
@@ -308,7 +308,7 @@ header("Location: ?cne=$beingManaged");
        </tbody>
        </table>
      </table>
-   <p><?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+   <p><?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
      <strong>Review Access:</strong>
    <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?><a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
 

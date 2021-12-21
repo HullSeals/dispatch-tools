@@ -38,7 +38,7 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
       <section class="introduction container">
     <article id="intro3">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
-      <p><?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+      <p><?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
         <strong>Review Access:</strong>
       <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?>
       <a href="." class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
