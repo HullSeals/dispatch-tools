@@ -23,14 +23,24 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['port']);
 
 //All Case Info
-$stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name,
-    hull_stat, status_name, color_name, notes, case_created
+$stmtCaseInfo = $mysqli->prepare("WITH sealsCTI
+AS
+(
+    SELECT MIN(ID), seal_ID, seal_name
+    FROM sealsudb.staff
+    GROUP BY seal_ID
+)
+SELECT client_nm, canopy_breach, current_sys, platform_name,
+    hull_stat, status_name, color_name, notes, case_created, rev_date, rev_stat_text, COALESCE(seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer, rev_notes
 FROM cases AS c
     JOIN case_seal AS cs ON cs.case_ID = c.case_ID
     JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
+    JOIN review_info as ri on ri.caseID = c.case_ID
     JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
     JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
     JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
+    JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
+    LEFT JOIN sealsCTI as ss on ss.seal_ID = ri.reviewer
 WHERE c.case_ID = ?;");
 $stmtCaseInfo->bind_param("i", $beingManaged);
 $stmtCaseInfo->execute();
@@ -155,11 +165,51 @@ if (isset($_GET['del'])) {
       echo '<tr>
         <td>'.$rowCaseInfo["notes"].'</td>
      </tr>';
-    }
-    $resultCaseInfo->free();
     ?>
   </tbody>
 </table>
+<br>
+<h5>Review Information</h5>
+<table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
+  <thead>
+  <tr>
+      <th>Reviewer</th>
+      <th>Status</th>
+      <th>Date</th>
+  </tr>
+</thead>
+<tbody>
+  <?php
+    echo '<td>'.$rowCaseInfo["reviewer"].'</td>
+    <td>'.$rowCaseInfo["rev_stat_text"].'</td>
+    <td>'.$rowCaseInfo["rev_date"].'</td>
+   </tr>';
+
+  ?>
+</tbody>
+</table>
+<?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+<br>
+<h5>Reviewer Notes</h5>
+<table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
+  <thead>
+  <tr>
+      <th>Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <?php
+    echo '<tr>
+      <td>'.$rowCaseInfo["rev_notes"].'</td>
+   </tr>';
+ }
+  ?>
+</tbody>
+</table>
+<?php
+}
+$resultCaseInfo->free();
+?>
        <br>
        <h3>Responder Information</h3>
        <table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
@@ -204,7 +254,7 @@ if (isset($_GET['del'])) {
        </tbody>
        </table>
        <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
-         <h4>Cyberseal Access:</h4>
+         <h4>Review Access:</h4>
        <a href="case-edit.php?cne=<?php echo"$beingManaged" ?>" class="btn btn-small btn-warning">Edit This Case</a> <button class="btn btn-danger btn-small" data-target="#moDel" data-toggle="modal" type="button">Mark Case for Deletion</button>
 	<div aria-hidden="true" class="modal fade" id="moDel" tabindex="-1">
 		<div class="modal-dialog modal-dialog-centered">

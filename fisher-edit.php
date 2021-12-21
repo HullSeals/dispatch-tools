@@ -24,10 +24,11 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
 
 //All Case Info
 $stmtCaseInfo = $mysqli->prepare("SELECT client_nm, current_sys, current_planet, site_coords, platform_name,
-   status_name, color_name, notes, case_created
+   status_name, color_name, notes, case_created, rev_notes, note_worth, review_status
 FROM cases AS c
     JOIN case_kf AS cs ON cs.case_ID = c.case_ID
     JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
+    JOIN review_info as ri on ri.caseID = c.case_ID
     JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
     JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
     JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
@@ -66,6 +67,10 @@ if (isset($_GET['updateinfo'])) {
   $stmt->bind_param('iiissssiiss', $beingManaged, $lore['status'], $lore['platform'], $lore['client_nm'], $lore['curr_sys'], $lore['current_planet'], $lore['site_coords'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
   $stmt->execute();
   $stmt->close();
+  $stmt2 = $mysqli->prepare('CALL spCaseReviewUpdate(?,?,?,?,?,?)');
+  $stmt2->bind_param('iiisis', $beingManaged, $lore['review_status'], $user->data()->id, $lore['revnotes'], $lore['noteworthy'], $lgd_ip);
+  $stmt2->execute();
+  $stmt2->close();
 header("Location: ?cne=$beingManaged");
 }
 ?>
@@ -84,7 +89,9 @@ header("Location: ?cne=$beingManaged");
     <article id="intro3">
       <form action="?updateinfo&cne=<?php echo $beingManaged; ?>" method="post">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
-      <p>You are Reviewing Paperwork for Case # <?php echo $beingManaged;?> <a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
+      <p>You are Reviewing Paperwork for Case # <?php echo $beingManaged;?> <?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+        <br><br><strong>Review Access:</strong>
+      <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?> <a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
       <br>
       <h3>Case Info</h3>
       <br>
@@ -193,11 +200,68 @@ header("Location: ?cne=$beingManaged");
         <td><textarea aria-label="Notes (Required)" minlength="10" class="form-control" name="notes" rows="5">'.$rowCaseInfo["notes"].'</textarea>
         </td>
      </tr>';
-    }
-    $resultCaseInfo->free();
     ?>
   </tbody>
 </table>
+<br>
+<h5>Review Status</h5>
+<table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
+  <thead>
+  <tr>
+      <th>Review Status</th>
+      <th>"Noteworthy" Case</th>
+  </tr>
+</thead>
+<tbody>
+  <?php
+    echo '<tr>
+    <td>
+    <select class="custom-select" id="inputGroupSelect04" name="review_status" required="">
+    <option value="1"';
+    if ($rowCaseInfo["review_status"] == 1) { echo "selected"; }
+    echo '>Needs Review</option>
+    <option value="2"';
+    if ($rowCaseInfo["review_status"] == 2) { echo "selected"; }
+    echo '>In Review</option>
+    <option value="3"';
+    if ($rowCaseInfo["review_status"] == 3) { echo "selected"; }
+    echo '>Review Complete</option>
+    </select>
+    </td>
+    <td>
+    <select class="custom-select" id="inputGroupSelect04" name="noteworthy" required="">
+    <option value="0"';
+    if ($rowCaseInfo["note_worth"] == 0) { echo "selected"; }
+    echo '>Not Noteworthy</option>
+    <option value="1"';
+    if ($rowCaseInfo["note_worth"] == 1) { echo "selected"; }
+    echo '>Noteworthy</option>
+    </select>
+    </td>';
+    ?>
+  </tbody>
+</table>
+<br>
+<h5>Reviewer Notes</h5>
+<table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
+  <thead>
+  <tr>
+      <th>Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <?php
+    echo '<tr>
+      <td><textarea aria-label="Reviewer Notes" minlength="10" class="form-control" name="revnotes" rows="5">'.$rowCaseInfo["rev_notes"].'</textarea>
+      </td>
+   </tr>';
+ }
+ $resultCaseInfo->free();
+  ?>
+</tbody>
+</table>
+
+
 <button type="submit" class="btn btn-warning">Update Case Info</button>
 </form>
        <br>
@@ -244,7 +308,9 @@ header("Location: ?cne=$beingManaged");
        </tbody>
        </table>
      </table>
-   <p><a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
+   <p><?php if(hasPerm([7,8,9,10],$user->data()->id)){?>
+     <strong>Review Access:</strong>
+   <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?><a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
 
      <br>
   </article>
