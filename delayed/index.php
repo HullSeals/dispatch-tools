@@ -3,20 +3,15 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-//UserSpice Required
-require_once '../../users/init.php';  //make sure this path is correct!
-if (!securePage($_SERVER['PHP_SELF'])){die();}
+//Declare Title, Content, Author
+$pgAuthor = "";
+$pgContent = "";
+$useIP = 0; //1 if Yes, 0 if No.
+$activePage = ''; //Used only for Menu Bar Sites
 
-?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-<meta content="Delayed Case Status" name="description">
-<meta http-equiv="refresh" content="300">
-<title>Delayed Case Status | The Hull Seals</title>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-<?php include '../../assets/includes/headerCenter.php'; ?>
+//If you have any custom scripts, CSS, etc, you MUST declare them here.
+//They will be inserted at the bottom of the <head> section.
+$customContent = '<meta http-equiv="refresh" content="60">
 <style>
 .modal-body{
   word-break: break-all;
@@ -24,13 +19,13 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 .baconator {
 	word-break: break-all;
 }
-</style>
-</head>
-<body>
-    <div id="home">
-      <?php include '../../assets/includes/menuCode.php';?>
-        <section class="introduction container">
-	    <article id="intro3">
+</style>';
+
+//UserSpice Required
+require_once '../../users/init.php';  //make sure this path is correct!
+require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
+if (!securePage($_SERVER['PHP_SELF'])){die();}
+?>
     <h1>Delayed Case Status Board</h1>
     <p>Sometimes, a case can't be completed quickly. Here you can view any pending cases the Seals have, and the status of those cases.</p>
     <?php
@@ -101,10 +96,5 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
     ?>
     <p><a href=".." class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
     <br />
-  </article>
-  <div class="clearfix"></div>
-</section>
-</div>
-<?php include '../../assets/includes/footer.php'; ?>
-</body>
-</html>
+    <?php
+    require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php';

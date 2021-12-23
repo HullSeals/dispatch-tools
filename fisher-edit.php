@@ -3,9 +3,20 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+//Declare Title, Content, Author
+$pgAuthor = "David Sangrey";
+$pgContent = "Edit the details of a Seal Case";
+$useIP = 1; //1 if Yes, 0 if No.
+
+//If you have any custom scripts, CSS, etc, you MUST declare them here.
+//They will be inserted at the bottom of the <head> section.
+$customContent = '<!-- Your Content Here -->';
+
 //UserSpice Required
 require_once '../users/init.php';  //make sure this path is correct!
+require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if (!securePage($_SERVER['PHP_SELF'])){die();}
+
 if (!isset($_GET['cne'])) {
   Redirect::to('cases-list.php');
 }
@@ -13,9 +24,6 @@ if (!isset($_GET['cne'])) {
 //Who are we working with?
 $beingManaged = $_GET['cne'];
 $beingManaged = intval($beingManaged);
-
-//IP Tracking Stuff
-require '../assets/includes/ipinfo.php';
 
 //DB Info
 $db = include 'db.php';
@@ -59,7 +67,8 @@ $stmtAssigned->execute();
 $resultAssigned = $stmtAssigned->get_result();
 $stmtAssigned->close();
 //$rowAssigned = $resultAssigned->fetch_assoc();
-if (isset($_GET['updateinfo'])) {
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") {
   foreach ($_REQUEST as $key => $value) {
       $lore[$key] = strip_tags(stripslashes(str_replace(["'", '"'], '', $value)));
   }
@@ -74,20 +83,8 @@ if (isset($_GET['updateinfo'])) {
 header("Location: ?cne=$beingManaged");
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta content="Welcome to the Hull Seals, Elite Dangerous's Premier Hull Repair Specialists!" name="description">
- <title>Case Review | The Hull Seals</title>
- <meta content="David Sangrey" name="author">
- <?php include '../assets/includes/headerCenter.php'; ?>
-</head>
-<body>
-    <div id="home">
-      <?php include '../assets/includes/menuCode.php';?>
-      <section class="introduction container">
-    <article id="intro3">
       <form action="?updateinfo&cne=<?php echo $beingManaged; ?>" method="post">
+        <input hidden type="text" name="formtype" value="updateCase">
       <h2>Welcome, <?php echo echousername($user->data()->id); ?>.</h2>
       <p>You are Reviewing Paperwork for Case # <?php echo $beingManaged;?> <?php if(hasPerm([7,8,9,10,19],$user->data()->id)){?>
         <br><br><strong>Review Access:</strong>
@@ -313,10 +310,5 @@ header("Location: ?cne=$beingManaged");
    <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?><a href="fisher-review.php?cne=<?php echo $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p><hr>
 
      <br>
-  </article>
-  <div class="clearfix"></div>
-</section>
-</div>
-<?php include '../assets/includes/footer.php'; ?>
-</body>
-</html>
+     <?php
+     require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php';
