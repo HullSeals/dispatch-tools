@@ -35,8 +35,7 @@ AS
     FROM sealsudb.staff
     GROUP BY seal_ID
 )
-SELECT client_nm, current_sys, current_planet, site_coords, platform_name,
-   status_name, color_name, notes, case_created, rev_date, rev_stat_text, COALESCE(seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
+SELECT client_nm, current_sys, current_planet, site_coords, platform_name, status_name, color_name, notes, case_created, rev_date, rev_stat_text, COALESCE(seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
 FROM cases AS c
     JOIN case_kf AS cs ON cs.case_ID = c.case_ID
     JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id

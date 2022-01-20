@@ -99,6 +99,7 @@ header("Location: ?cne=$beingManaged");
                       <th>Client Name</th>
                       <th>System</th>
                       <th>Platform</th>
+                      <th>Paperwork Filed</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -123,6 +124,7 @@ header("Location: ?cne=$beingManaged");
                     echo '>PC - Horizons</option>
                     </select>
                     </td>
+                    <td>'.$rowCaseInfo["case_created"].'</td>
                    </tr>';
                   ?>
                 </tbody>

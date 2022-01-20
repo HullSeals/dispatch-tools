@@ -37,8 +37,7 @@ while ($burgerking = $res->fetch_assoc())
 }
 
 //All Case Info
-$stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name,
-    hull_stat, status_name, color_name, notes, case_created, platform_id, rev_notes, note_worth, review_status
+$stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name, hull_stat, status_name, color_name, notes, case_created, platform_id, rev_notes, note_worth, review_status
 FROM cases AS c
     JOIN case_seal AS cs ON cs.case_ID = c.case_ID
     JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
@@ -104,6 +103,7 @@ header("Location: ?cne=$beingManaged");
             <th>Client Name</th>
             <th>System</th>
             <th>Platform</th>
+            <th>Paperwork Filed</th>
         </tr>
       </thead>
       <tbody>
@@ -128,6 +128,7 @@ header("Location: ?cne=$beingManaged");
           echo '>PC - Horizons</option>
           </select>
           </td>
+          <td>'.$rowCaseInfo["case_created"].'</td>
          </tr>';
         ?>
       </tbody>
