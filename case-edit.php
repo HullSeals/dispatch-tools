@@ -37,7 +37,7 @@ while ($burgerking = $res->fetch_assoc())
 }
 
 //All Case Info
-$stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name, hull_stat, status_name, color_name, notes, case_created, platform_id, rev_notes, note_worth, review_status
+$stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name, hull_stat, status_name, color_name, notes, case_created, platform_id, rev_notes, note_worth, review_status, db_update
 FROM cases AS c
     JOIN case_seal AS cs ON cs.case_ID = c.case_ID
     JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
@@ -80,8 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
   $stmt->bind_param('iiissiiiiss', $beingManaged, $lore['status'], $lore['platform'], $lore['client_nm'], $lore['curr_sys'], $lore['canopy_status'], $lore['hull'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
   $stmt->execute();
   $stmt->close();
-  $stmt2 = $mysqli->prepare('CALL spCaseReviewUpdate(?,?,?,?,?,?)');
-  $stmt2->bind_param('iiisis', $beingManaged, $lore['review_status'], $user->data()->id, $lore['revnotes'], $lore['noteworthy'], $lgd_ip);
+  $stmt2 = $mysqli->prepare('CALL spCaseReviewUpdate(?,?,?,?,?,?,?)');
+  $stmt2->bind_param('iiisiis', $beingManaged, $lore['review_status'], $user->data()->id, $lore['revnotes'], $lore['noteworthy'], $lore['dbupdate'], $lgd_ip);
   $stmt2->execute();
   $stmt2->close();
 header("Location: ?cne=$beingManaged");
@@ -231,6 +231,7 @@ header("Location: ?cne=$beingManaged");
   <tr>
       <th>Review Status</th>
       <th>"Noteworthy" Case</th>
+      <th>DB Update</th>
   </tr>
 </thead>
 <tbody>
@@ -257,6 +258,16 @@ header("Location: ?cne=$beingManaged");
     <option value="1"';
     if ($rowCaseInfo["note_worth"] == 1) { echo "selected"; }
     echo '>Noteworthy</option>
+    </select>
+    </td>
+    <td>
+    <select class="custom-select" id="inputGroupSelect04" name="dbupdate" required="">
+    <option value="0"';
+    if ($rowCaseInfo["db_update"] == 0) { echo "selected"; }
+    echo '>No DB Update</option>
+    <option value="1"';
+    if ($rowCaseInfo["db_update"] == 1) { echo "selected"; }
+    echo '>Needs Updated</option>
     </select>
     </td>';
     ?>
