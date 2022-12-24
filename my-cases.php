@@ -23,8 +23,10 @@ $customContent = ' <script>
 
 //UserSpice Required
 require_once '../users/init.php';  //make sure this path is correct!
-require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
-if (!securePage($_SERVER['PHP_SELF'])){die();}
+require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
+if (!securePage($_SERVER['PHP_SELF'])) {
+  die();
+}
 
 $db = include 'db.php';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -32,24 +34,24 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
 
 //Get All Paperwork
 ?>
-      <h2>Welcome, <?php echo echousername($user->data()->id); ?>. Here are the cases you've been on...</h2>
-      <p><a href="https://hullseals.space/seal-links/" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
-      <br>
-      <br>
-      <table class="table table-hover table-dark table-responsive-md table-bordered table-striped" id="PaperworkList">
-        <thead>
-        <tr>
-            <th>Case ID</th>
-            <th>Client</th>
-            <th>System</th>
-            <th>Platform</th>
-            <th>Date</th>
-            <th>Options</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php
-$stmt = $mysqli->prepare("WITH sealsCTI
+<h2>Welcome, <?= echousername($user->data()->id); ?>. Here are the cases you've been on...</h2>
+<p><a href="https://hullseals.space/seal-links/" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
+<br>
+<br>
+<table class="table table-hover table-dark table-responsive-md table-bordered table-striped" id="PaperworkList">
+  <thead>
+    <tr>
+      <th>Case ID</th>
+      <th>Client</th>
+      <th>System</th>
+      <th>Platform</th>
+      <th>Date</th>
+      <th>Options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php
+    $stmt = $mysqli->prepare("WITH sealsCTI
         AS
         (
                     SELECT MIN(ID), seal_ID, seal_name
@@ -64,33 +66,31 @@ SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf
   INNER JOIN sealsCTI AS sc ON sc.seal_ID = ca.seal_kf_id
   JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
   WHERE seal_ID = ? AND case_stat != 8 GROUP BY c.case_ID");
-  $stmt->bind_param("i", $user->data()->id);
-  $stmt->execute();
-  $result = $stmt->get_result();
-while ($row = $result->fetch_assoc()) {
-  $field1name = $row["case_ID"];
-  $field2name = $row["client_nm"];
-  $field3name = $row["current_sys"];
-  $field4name = $row["platform_name"];
-  $field5name = $row["case_created"];
-  echo '<tr>
-    <td>'.$field1name.'</td>
-    <td>'.$field2name.'</td>
-    <td>'.$field3name.'</td>
-    <td>'.$field4name.'</td>
-    <td>'.$field5name.'</td>';
-if ($row["hs_kf"]==2) {
-  echo  '<td><a href="my-fisher-review.php?cne='.$field1name.'" class="btn btn-info active">Review KF Case</a></td>';
-}
-else {
-echo  '<td><a href="my-case-review.php?cne='.$field1name.'" class="btn btn-warning active">Review Seal Case</a></td>';
+    $stmt->bind_param("i", $user->data()->id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+      $field1name = $row["case_ID"];
+      $field2name = $row["client_nm"];
+      $field3name = $row["current_sys"];
+      $field4name = $row["platform_name"];
+      $field5name = $row["case_created"];
+      echo '<tr>
+    <td>' . $field1name . '</td>
+    <td>' . $field2name . '</td>
+    <td>' . $field3name . '</td>
+    <td>' . $field4name . '</td>
+    <td>' . $field5name . '</td>';
+      if ($row["hs_kf"] == 2) {
+        echo  '<td><a href="my-fisher-review.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
+      } else {
+        echo  '<td><a href="my-case-review.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>';
+      }
+      echo '</tr>';
+    }
+    $result->free();
+    ?>
 
-}
-  echo '</tr>';
-}
-$result->free();
-?>
-
-      </tbody>
-      </table>
-      <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>
+  </tbody>
+</table>
+<?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>
