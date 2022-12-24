@@ -115,13 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       <?php
       while ($rowCaseInfo = $resultCaseInfo->fetch_assoc()) {
         echo '<tr>
-          <td><input aria-label="Client Name" class="form-control" name="client_nm" placeholder="Client Name" required="" type="text" value="' . $rowCaseInfo["client_nm"] . '"></td>
-          <td><input aria-label="System" class="form-control" name="curr_sys" placeholder="System" required="" type="text" value="' . $rowCaseInfo["current_sys"] . '"></td>
+          <td><input class="form-control" name="client_nm" placeholder="Client Name" required type="text" value="' . $rowCaseInfo["client_nm"] . '"></td>
+          <td><input class="form-control" name="curr_sys" placeholder="System" required type="text" value="' . $rowCaseInfo["current_sys"] . '"></td>
           <td>
-          <select class="custom-select" id="inputGroupSelect03" name="platform" required="">
+          <select class="custom-select" id="inputGroupSelect03" name="platform" required>
           <option value="1"';
         # TODO: Simplify This
-          if ($rowCaseInfo["platform_name"] == "PC - Odyssey") {
+        if ($rowCaseInfo["platform_name"] == "PC - Odyssey") {
           echo "selected";
         }
         echo '>PC - Odyssey</option>
@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       <?php
         echo '<tr>
         <td>
-        <select class="custom-select" id="inputGroupSelect04" name="canopy_status" required="">
+        <select class="custom-select" id="inputGroupSelect04" name="canopy_status" required>
         <option value="0"';
         if ($rowCaseInfo["canopy_breach"] == 0) {
           echo "selected";
@@ -173,11 +173,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
           echo "selected";
         }
         echo '>Broken</option>
-        </select>
-        </td>
-        <td><input aria-label="Starting Hull %" class="form-control" max="100" min="1" name="hull" placeholder="Starting Hull %" required="" type="number" value="' . $rowCaseInfo["hull_stat"] . '"></td>
-        <td>
-        <select class="custom-select" id="inputGroupSelect01" name="color" required="">
+        </select>'; ?>
+      </td>
+      <td><input class="form-control" max="100" min="1" name="hull" placeholder="Starting Hull %" required type="number" value="<?= $rowCaseInfo[" hull_stat"] ?>"></td>
+      <td>
+        <?php
+        echo '<select class="custom-select" id="inputGroupSelect01" name="color" required>
         <option value="1"';
         if ($rowCaseInfo["color_name"] == "Green") {
           echo "selected";
@@ -211,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
         </select>
         </td>
         <td>
-        <select class="custom-select" id="inputGroupSelect02" name="status" required="">
+        <select class="custom-select" id="inputGroupSelect02" name="status" required>
         <option value="2"';
         if ($rowCaseInfo["status_name"] == "Closed - Successful") {
           echo "selected";
@@ -245,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
         </select>
         </td>
        </tr>';
-      ?>
+        ?>
     </tbody>
   </table>
   <br>
@@ -259,10 +260,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     <tbody>
       <?php
         echo '<tr>
-        <td><textarea aria-label="Notes (Required)" minlength="10" class="form-control" name="notes" rows="5">' . $rowCaseInfo["notes"] . '</textarea>
+        <td><textarea minlength="10" class="form-control" name="notes" rows="5">' . $rowCaseInfo["notes"] . '</textarea>
         </td>
      </tr>';
-
       ?>
     </tbody>
   </table>
@@ -280,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       <?php
         echo '<tr>
     <td>
-    <select class="custom-select" id="inputGroupSelect04" name="review_status" required="">
+    <select class="custom-select" id="inputGroupSelect04" name="review_status" required>
     <option value="1"';
         if ($rowCaseInfo["review_status"] == 1) {
           echo "selected";
@@ -299,7 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     </select>
     </td>
     <td>
-    <select class="custom-select" id="inputGroupSelect04" name="noteworthy" required="">
+    <select class="custom-select" id="inputGroupSelect04" name="noteworthy" required>
     <option value="0"';
         if ($rowCaseInfo["note_worth"] == 0) {
           echo "selected";
@@ -313,7 +313,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     </select>
     </td>
     <td>
-    <select class="custom-select" id="inputGroupSelect04" name="dbupdate" required="">
+    <select class="custom-select" id="inputGroupSelect04" name="dbupdate" required>
     <option value="0"';
         if ($rowCaseInfo["db_update"] == 0) {
           echo "selected";
@@ -338,20 +338,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       </tr>
     </thead>
     <tbody>
+      <tr>
+        <td><textarea minlength="10" class="form-control" name="revnotes" rows="5"><?= $rowCaseInfo["rev_notes"] ?></textarea>
+        </td>
+      </tr>
     <?php
-        echo '<tr>
-      <td><textarea aria-label="Reviewer Notes" minlength="10" class="form-control" name="revnotes" rows="5">' . $rowCaseInfo["rev_notes"] . '</textarea>
-      </td>
-   </tr>';
       }
       $resultCaseInfo->free();
     ?>
     </tbody>
   </table>
-
   <button type="submit" class="btn btn-warning">Update Case and Review Info</button>
 </form>
-
 <br>
 <h3>Responder Information</h3>
 <table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
@@ -393,9 +391,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
 </table>
 <p><?php if (hasPerm([7, 8, 9, 10, 19], $user->data()->id)) { ?>
     <strong>Review Access:</strong>
-    <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a><?php } ?><a href="case-review.php?cne=<?= $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a>
+    <a href="review-list.php" class="btn btn-small btn-warning">Review Case Dashboard</a>
+  <?php } ?>
+  <a href="case-review.php?cne=<?= $beingManaged; ?>" class="btn btn-small btn-danger" style="float: right;">Go Back</a>
 </p>
 <hr>
-
 <br>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

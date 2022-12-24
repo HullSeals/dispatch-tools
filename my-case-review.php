@@ -228,17 +228,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
 <?php if (hasPerm([7, 8, 9, 10, 19], $user->data()->id)) { ?>
   <h4>Review Access:</h4>
   <a href="case-edit.php?cne=<?= $beingManaged ?>" class="btn btn-small btn-warning">Edit This Case</a> <button class="btn btn-danger btn-small" data-target="#moDel" data-toggle="modal" type="button">Mark Case for Deletion</button>
-  <div aria-hidden="true" class="modal fade" id="moDel" tabindex="-1">
+  <div class="modal fade" id="moDel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel" style="color:black;">Mark Case for Deletion</h5><button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+          <h5 class="modal-title" id="exampleModalLabel" style="color:black;">Mark Case for Deletion</h5><button class="close" data-dismiss="modal" type="button"><span>&times;</span></button>
         </div>
         <div class="modal-body" style="color:black;">
           <form action="?del" method="post">
             <input hidden type="text" name="formtype" value="delCase">
             <div class="input-group mb-3">
-              <textarea aria-label="Notes (Required)" class="form-control" name="notes" placeholder="Reason for Deletion (Required)" required rows="5" style="color:black;"><?= $data['notes'] ?? '' ?></textarea>
+              <textarea class="form-control" name="notes" placeholder="Reason for Deletion (Required)" required rows="5" style="color:black;"><?= $data['notes'] ?? '' ?></textarea>
             </div>
             <div class="modal-footer">
               <button class="btn btn-primary" type="submit">Submit</button><button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>

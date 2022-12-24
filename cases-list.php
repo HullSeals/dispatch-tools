@@ -4,14 +4,13 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 //Declare Title, Content, Author
-$pgAuthor = "";
-$pgContent = "";
+$pgAuthor = "David Sangrey";
+$pgContent = "Case Listing";
 $useIP = 0; //1 if Yes, 0 if No.
-$activePage = ''; //Used only for Menu Bar Sites
 
 //If you have any custom scripts, CSS, etc, you MUST declare them here.
 //They will be inserted at the bottom of the <head> section.
-$customContent = ' <script>
+$customContent = '<script>
  $(document).ready(function() {
  $(\'#PaperworkList\').DataTable({
    "order": [[ 0, \'desc\' ]]
@@ -79,14 +78,15 @@ GROUP BY c.case_ID");
       $field3name = $row["current_sys"];
       $field4name = $row["platform_name"];
       $field5name = $row["case_created"];
-      $field6name = $row["seal_name"];
-      echo '<tr>
-    <td>' . $field1name . '</td>
-    <td>' . $field2name . '</td>
-    <td>' . $field6name . '</td>
-    <td>' . $field3name . '</td>
-    <td>' . $field4name . '</td>
-    <td>' . $field5name . '</td>';
+      $field6name = $row["seal_name"]; ?>
+    <tr>
+    <td><?= $field1name ?></td>
+    <td><?= $field2name ?></td>
+    <td><?= $field6name ?></td>
+    <td><?= $field3name ?></td>
+    <td><?= $field4name ?></td>
+    <td><?= $field5name ?></td>
+    <?php
       if ($row["hs_kf"] == 2) {
         echo  '<td><a href="fisher-review.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
       } else {
@@ -96,7 +96,6 @@ GROUP BY c.case_ID");
     }
     $result->free();
     ?>
-
   </tbody>
 </table>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

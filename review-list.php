@@ -1,4 +1,5 @@
 <?php
+# TODO: REVIEW ME
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -7,7 +8,6 @@ error_reporting(E_ALL);
 $pgAuthor = "";
 $pgContent = "";
 $useIP = 0; //1 if Yes, 0 if No.
-$activePage = ''; //Used only for Menu Bar Sites
 
 //If you have any custom scripts, CSS, etc, you MUST declare them here.
 //They will be inserted at the bottom of the <head> section.
@@ -52,15 +52,16 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
   </thead>
   <tbody>
     <?php
+    # TODO: SP?
     $stmt = $mysqli->prepare("WITH sealsCTI
-AS
-(
+    AS
+    (
     SELECT MIN(ID), seal_ID, seal_name
     FROM sealsudb.staff
     GROUP BY seal_ID
-)
-SELECT c.case_ID, client_nm, case_created, hs_kf, rev_stat_text, COALESCE(ss.seal_name, (SELECT ss.seal_name FROM case_assigned WHERE case_stat != 8 AND (dispatch = TRUE AND support = FALSE AND c.case_ID = case_ID)), 'ERROR') AS seal_name, COALESCE(ss2.seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
-FROM cases AS c
+    )
+    SELECT c.case_ID, client_nm, case_created, hs_kf, rev_stat_text, COALESCE(ss.seal_name, (SELECT ss.seal_name FROM case_assigned WHERE case_stat != 8 AND (dispatch = TRUE AND support = FALSE AND c.case_ID = case_ID)), 'ERROR') AS seal_name, COALESCE(ss2.seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
+    FROM cases AS c
     JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
     JOIN review_info as ri on ri.caseID = c.case_ID
     LEFT JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
@@ -68,8 +69,8 @@ FROM cases AS c
     LEFT JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
     JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
     LEFT JOIN sealsCTI as ss2 on ss2.seal_ID = ri.reviewer
-WHERE case_stat != 8 AND review_status != 3
-GROUP BY c.case_ID DESC");
+    WHERE case_stat != 8 AND review_status != 3
+    GROUP BY c.case_ID DESC");
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
@@ -78,24 +79,23 @@ GROUP BY c.case_ID DESC");
       $field3name = $row["rev_stat_text"];
       $field4name = $row["reviewer"];
       $field5name = $row["case_created"];
-      $field6name = $row["seal_name"];
-      echo '<tr>
-    <td>' . $field1name . '</td>
-    <td>' . $field2name . '</td>
-    <td>' . $field6name . '</td>
-    <td>' . $field3name . '</td>
-    <td>' . $field4name . '</td>
-    <td>' . $field5name . '</td>';
-      if ($row["hs_kf"] == 2) {
-        echo  '<td><a href="fisher-edit.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
-      } else {
-        echo  '<td><a href="case-edit.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>';
-      }
-      echo '</tr>';
-    }
+      $field6name = $row["seal_name"]; ?>
+      <tr>
+        <td><?= $field1name ?></td>
+        <td><?= $field2name ?></td>
+        <td><?= $field6name ?></td>
+        <td><?= $field3name ?></td>
+        <td><?= $field4name ?></td>
+        <td><?= $field5name ?></td>
+        <? if ($row["hs_kf"] == 2) {
+          echo  '<td><a href="fisher-edit.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
+        } else {
+          echo  '<td><a href="case-edit.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>';
+        } ?>
+      </tr>
+    <?php }
     $result->free();
     ?>
-
   </tbody>
 </table>
 <br>
