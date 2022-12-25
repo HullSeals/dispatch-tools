@@ -33,17 +33,17 @@ $res = $mysqli->query('SELECT * FROM lookups.platform_lu ORDER BY platform_id');
 while ($platform = $res->fetch_assoc()) {
   $platformList[$platform['platform_id']] = $platform['platform_name'];
 }
-$colorList = [];
-$resColor = $mysqli->query('SELECT * FROM lookups.status_lu ORDER BY status_id');
-while ($casestat = $resColor->fetch_assoc()) {
+$statusList = [];
+$resStatus = $mysqli->query('SELECT * FROM lookups.status_lu ORDER BY status_id');
+while ($casestat = $resStatus->fetch_assoc()) {
   if ($casestat['status_name'] == 'Open' || $casestat['status_name'] == 'On Hold' || $casestat['status_name'] == 'Delete Case') {
     continue;
   }
   $statusList[$casestat['status_id']] = $casestat['status_name'];
 }
-$statusList = [];
-$resStatus = $mysqli->query('SELECT * FROM lookups.case_color_lu where color_id < 8');
-while ($color = $resStatus->fetch_assoc()) {
+$colorList = [];
+$resColor = $mysqli->query('SELECT * FROM lookups.case_color_lu where color_id < 8');
+while ($color = $resColor->fetch_assoc()) {
   $colorList[$color['color_id']] = $color['color_name'];
 }
 
@@ -162,11 +162,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
               $colorName == $rowCaseInfo["color_name"] ? $selected = "selected" : $selected = "";
               echo '<option value="' . $colorId . '"' . $selected . '>' . $colorName . '</option>';
             } ?>
+          </select>
         </td>
         <td>
           <select class="custom-select" id="inputGroupSelect02" name="status" required>
             <?php foreach ($statusList as $statusId => $statusName) {
-              $statusName == $rowCaseInfo["color_name"] ? $selected = "selected" : $selected = "";
+              $statusName == $rowCaseInfo["status_name"] ? $selected = "selected" : $selected = "";
               echo '<option value="' . $statusId . '"' . $selected . '>' . $statusName . '</option>';
             } ?>
           </select>

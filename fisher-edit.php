@@ -28,6 +28,24 @@ $beingManaged = intval($beingManaged);
 $db = include 'db.php';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['port']);
+$platformList = [];
+$res = $mysqli->query('SELECT * FROM lookups.platform_lu ORDER BY platform_id');
+while ($platform = $res->fetch_assoc()) {
+  $platformList[$platform['platform_id']] = $platform['platform_name'];
+}
+$statusList = [];
+$resStatus = $mysqli->query('SELECT * FROM lookups.status_lu ORDER BY status_id');
+while ($casestat = $resStatus->fetch_assoc()) {
+  if ($casestat['status_name'] == 'Open' || $casestat['status_name'] == 'On Hold' || $casestat['status_name'] == 'Delete Case') {
+    continue;
+  }
+  $statusList[$casestat['status_id']] = $casestat['status_name'];
+}
+$colorList = [];
+$resColor = $mysqli->query('SELECT * FROM lookups.case_color_lu where color_id > 7');
+while ($color = $resColor->fetch_assoc()) {
+  $colorList[$color['color_id']] = $color['color_name'];
+}
 
 //All Case Info
 $stmtCaseInfo = $mysqli->prepare("SELECT client_nm, current_sys, current_planet, site_coords, platform_name,
@@ -53,13 +71,13 @@ if ($resultCaseInfo->num_rows === 0) {
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
 AS
 (
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
 )
 SELECT COALESCE(seal_name, CONCAT('SEAL ID ', seal_kf_id), 'MISSING INFORMATION') AS seal_name, dispatch, support, self_dispatch
 FROM case_assigned AS ca
-    LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
+LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
 WHERE case_ID = ?;");
 $stmtAssigned->bind_param("i", $beingManaged);
 $stmtAssigned->execute();
@@ -106,29 +124,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       <?php
       while ($rowCaseInfo = $resultCaseInfo->fetch_assoc()) { ?>
         <tr>
-          <td><input class="form-control" name="client_nm" placeholder="Client Name" required type="text" value="<?= $rowCaseInfo[" client_nm"] ?>"></td>
+          <td><input class="form-control" name="client_nm" placeholder="Client Name" required type="text" value="<?= $rowCaseInfo["client_nm"] ?>"></td>
           <td><input class="form-control" name="curr_sys" placeholder="System" required type="text" value="<?= $rowCaseInfo["current_sys"] ?>"></td>
           <td>
             <select class="custom-select" id="inputGroupSelect03" name="platform" required>
-              <option value="1" <?php # TODO: Simplify This
-                                if ($rowCaseInfo["platform_name"] == "PC - Odyssey") {
-                                  echo "selected";
-                                }
-                                echo '>PC - Odyssey</option>
-                    <option value="2"';
-                                if ($rowCaseInfo["platform_name"] == "Xbox") {
-                                  echo "selected";
-                                }
-                                echo '>Xbox</option>
-                    <option value="3"';
-                                if ($rowCaseInfo["platform_name"] == "PlayStation") {
-                                  echo "selected";
-                                }
-                                echo '>PlayStation</option>
-                    <option value="4"';
-                                if ($rowCaseInfo["platform_name"] == "PC - Horizons") {
-                                  echo "selected";
-                                } ?>>PC - Horizons</option>
+              <?php foreach ($platformList as $platformId => $platformName) {
+                $platformName == $rowCaseInfo["platform_name"] ? $selected = "selected" : $selected = "";
+                echo '<option value="' . $platformId . '"' . $selected . '>' . $platformName . '</option>';
+              } ?>
             </select>
           </td>
           <td><?= $rowCaseInfo["case_created"] ?></td>
@@ -151,58 +154,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
         <td><input class="form-control" name="site_coords" placeholder="Site Coords" required type="text" value="<?= $rowCaseInfo["site_coords"] ?>"></td>
         <td>
           <select class="custom-select" id="inputGroupSelect01" name="color" required>
-            <option value="8" <?php # TODO: Fix this
-                              if ($rowCaseInfo["color_name"] == "Lift") {
-                                echo "selected";
-                              }
-                              echo '>Lift</option>
-        <option value="9"';
-                              if ($rowCaseInfo["color_name"] == "Golf") {
-                                echo "selected";
-                              }
-                              echo '>Golf</option>
-        <option value="10"';
-                              if ($rowCaseInfo["color_name"] == "Puck") {
-                                echo "selected";
-                              }
-                              echo '>Puck</option>
-        <option value="11"';
-                              if ($rowCaseInfo["color_name"] == "Pick") {
-                                echo "selected";
-                              } ?>>Pick</option>
+            <?php foreach ($colorList as $colorId => $colorName) {
+              $colorName == $rowCaseInfo["color_name"] ? $selected = "selected" : $selected = "";
+              echo '<option value="' . $colorId . '"' . $selected . '>' . $colorName . '</option>';
+            } ?>
           </select>
         </td>
         <td>
           <select class="custom-select" id="inputGroupSelect02" name="status" required>
-            <option value="2" <?php # TODO: Fix this
-                              if ($rowCaseInfo["status_name"] == "Closed - Successful") {
-                                echo "selected";
-                              }
-                              echo '>Closed - Successful</option>
-                <option value="3"';
-                              if ($rowCaseInfo["status_name"] == "Closed - Failed") {
-                                echo "selected";
-                              }
-                              echo '>Closed - Failed</option>
-                <option value="4"';
-                              if ($rowCaseInfo["status_name"] == "Closed - Redirected") {
-                                echo "selected";
-                              }
-                              echo '>Closed - Redirected</option>
-                <option value="5"';
-                              if ($rowCaseInfo["status_name"] == "Closed - Other") {
-                                echo "selected";
-                              }
-                              echo '>Closed - Other</option>
-                <option value="6"';
-                              if ($rowCaseInfo["status_name"] == "Closed - False Case") {
-                                echo "selected";
-                              }
-                              echo '>Closed - False Case</option>
-                <option value="8"';
-                              if ($rowCaseInfo["status_name"] == "Delete Case") {
-                                echo "selected";
-                              } ?>>Delete Case</option>
+            <?php foreach ($statusList as $statusId => $statusName) {
+              $statusName == $rowCaseInfo["status_name"] ? $selected = "selected" : $selected = "";
+              echo '<option value="' . $statusId . '"' . $selected . '>' . $statusName . '</option>';
+            } ?>
           </select>
         </td>
       </tr>
@@ -237,44 +200,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       <tr>
         <td>
           <select class="custom-select" id="inputGroupSelect04" name="review_status" required>
-            <option value="1" <?php # TODO: Fix this
-                              if ($rowCaseInfo["review_status"] == 1) {
-                                echo "selected";
-                              }
-                              echo '>Needs Review</option>
-    <option value="2"';
-                              if ($rowCaseInfo["review_status"] == 2) {
-                                echo "selected";
-                              }
-                              echo '>In Review</option>
-    <option value="3"';
-                              if ($rowCaseInfo["review_status"] == 3) {
-                                echo "selected";
-                              } ?>>Review Complete</option>
+            <option value="1" <?= $rowCaseInfo["review_status"] == 1 ? "selected" : ""; ?>>Needs Review</option>
+            <option value="2" <?= $rowCaseInfo["review_status"] == 2 ? "selected" : ""; ?>>In Review</option>
+            <option value="3" <?= $rowCaseInfo["review_status"] == 3 ? "selected" : ""; ?>>Review Complete</option>
           </select>
         </td>
         <td>
           <select class="custom-select" id="inputGroupSelect04" name="noteworthy" required>
-            <option value="0" <?php if ($rowCaseInfo["note_worth"] == 0) {
-                                echo "selected";
-                              }
-                              echo '>Not Noteworthy</option>
-    <option value="1"';
-                              if ($rowCaseInfo["note_worth"] == 1) {
-                                echo "selected";
-                              } ?>>Noteworthy</option>
+            <option value="0" <?= $rowCaseInfo["note_worth"] == 0 ? "selected" : ""; ?>>Not Noteworthy</option>
+            <option value="1" <?= $rowCaseInfo["note_worth"] == 1 ? "selected" : ""; ?>>Noteworthy</option>
           </select>
         </td>
         <td>
           <select class="custom-select" id="inputGroupSelect04" name="dbupdate" required>
-            <option value="0" <? if ($rowCaseInfo["db_update"] == 0) {
-                                echo "selected";
-                              }
-                              echo '>No DB Update</option>
-    <option value="1"';
-                              if ($rowCaseInfo["db_update"] == 1) {
-                                echo "selected";
-                              } ?>>Needs Updated</option>
+            <option value="0" <?= $rowCaseInfo["db_update"] == 0 ? "selected" : ""; ?>>No DB Update</option>
+            <option value="1" <?= $rowCaseInfo["db_update"] == 1 ? "selected" : ""; ?>>Needs Updated</option>
           </select>
         </td>
     </tbody>
@@ -318,22 +258,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       $field4name = $rowAssigned["self_dispatch"]; ?>
       <tr>
         <td><?= $field1name ?></td>
-        <? if ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 0) {
-          echo '<td>Primary Seal</td>';
-        } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 0) {
-          echo '<td>Dispatcher</td>';
-        } elseif ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 1) {
-          echo '<td>Supporting Seal</td>';
-        } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 1) {
-          echo '<td>Supporting Dispatcher</td>';
-        }
-        if ($rowAssigned["self_dispatch"] == 0) {
-          echo '<td>No</td>';
-        } else {
-          echo '<td>Yes</td>';
-        } ?>
+        <?php if ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 0) { ?>
+          <td>Primary Seal</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 0) { ?>
+          <td>Dispatcher</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 1) { ?>
+          <td>Supporting Seal</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 1) { ?>
+          <td>Supporting Dispatcher</td>
+        <?php }
+        echo $rowAssigned["self_dispatch"] == 0 ? "<td>No</td>" : "<td>Yes</td>"; ?>
       </tr>
-    <?php }
+    <?php
+    }
     $resultAssigned->free();
     ?>
   </tbody>
