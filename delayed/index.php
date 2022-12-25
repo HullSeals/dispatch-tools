@@ -66,7 +66,7 @@ $result = $stmt->get_result(); ?>
                     <div class="modal-header">
                       <h5 class="modal-title" style="color:black;" id="exampleModalLabel">Delayed Case Notes</h5>
                       <button type="button" class="close" data-dismiss="modal">
-                        <span >&times;</span>
+                        <span>&times;</span>
                       </button>
                     </div>
                     <div class="modal-body" style="color:black;">

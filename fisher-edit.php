@@ -49,7 +49,6 @@ if ($resultCaseInfo->num_rows === 0) {
   die();
 }
 
-//$rowCaseInfo = $resultCaseInfo->fetch_assoc();
 //All Assigned Seals
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
 AS

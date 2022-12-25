@@ -56,7 +56,6 @@ if ($resultCaseInfo->num_rows === 0) {
   header('Location: cases-list.php');
 }
 
-//$rowCaseInfo = $resultCaseInfo->fetch_assoc();
 //All Assigned Seals
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
 AS
@@ -73,7 +72,6 @@ $stmtAssigned->bind_param("i", $beingManaged);
 $stmtAssigned->execute();
 $resultAssigned = $stmtAssigned->get_result();
 $stmtAssigned->close();
-//$rowAssigned = $resultAssigned->fetch_assoc();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
   foreach ($_REQUEST as $key => $value) {
