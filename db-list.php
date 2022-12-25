@@ -85,15 +85,11 @@ GROUP BY c.case_ID DESC;");
         <td><?= $field3name ?></td>
         <td><?= $field4name ?></td>
         <td><?= $field5name ?></td>
-      <?php if ($row["hs_kf"] == 2) {
-        echo  '<td><a href="fisher-edit.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
-      } else {
-        echo  '<td><a href="case-edit.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>';
-      }
-      echo '</tr>';
-    }
+        <?= $row["hs_kf"] == 2 ? '<td><a href="fisher-edit.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>' : '<td><a href="case-edit.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>'; ?>
+      </tr>
+    <?php }
     $result->free();
-      ?>
+    ?>
   </tbody>
 </table>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

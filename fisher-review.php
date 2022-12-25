@@ -200,25 +200,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
       $field1name = $rowAssigned["seal_name"];
       $field2name = $rowAssigned["dispatch"];
       $field3name = $rowAssigned["support"];
-      $field4name = $rowAssigned["self_dispatch"];
-      # TODO: Can we do this logic in the SP?
-      echo '<tr>
-             <td>' . $field1name . '</td>';
-      if ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 0) {
-        echo '<td>Primary Seal</td>';
-      } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 0) {
-        echo '<td>Dispatcher</td>';
-      } elseif ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 1) {
-        echo '<td>Supporting Seal</td>';
-      } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 1) {
-        echo '<td>Supporting Dispatcher</td>';
-      }
-      if ($rowAssigned["self_dispatch"] == 0) {
-        echo '<td>No</td>';
-      } else {
-        echo '<td>Yes</td>';
-      }
-      echo '</tr>';
+      $field4name = $rowAssigned["self_dispatch"]; ?>
+      <tr>
+        <td><?= $field1name ?></td>
+        <?php if ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 0) { ?>
+          <td>Primary Seal</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 0) { ?>
+          <td>Dispatcher</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 1) { ?>
+          <td>Supporting Seal</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 1) { ?>
+          <td>Supporting Dispatcher</td>
+        <?php }
+        echo $rowAssigned["self_dispatch"] == 0 ? "<td>No</td>" : "<td>Yes</td>"; ?>
+      </tr>
+    <?php
     }
     $resultAssigned->free();
     ?>

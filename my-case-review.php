@@ -4,14 +4,10 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 //Declare Title, Content, Author
-$pgAuthor = "";
-$pgContent = "";
+$pgAuthor = "David Sangrey";
+$pgContent = "My Cases";
 $useIP = 1; //1 if Yes, 0 if No.
 $activePage = ''; //Used only for Menu Bar Sites
-
-//If you have any custom scripts, CSS, etc, you MUST declare them here.
-//They will be inserted at the bottom of the <head> section.
-$customContent = '<!-- Your Content Here -->';
 
 //UserSpice Required
 require_once '../users/init.php';  //make sure this path is correct!
@@ -21,7 +17,8 @@ if (!securePage($_SERVER['PHP_SELF'])) {
 }
 
 if (!isset($_GET['cne'])) {
-  Redirect::to('cases-list.php');
+  header('Location: cases-list.php');
+  die();
 }
 
 //Who are we working with?
@@ -37,40 +34,41 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
 $stmtCaseInfo = $mysqli->prepare("WITH sealsCTI
 AS
 (
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
 )
 SELECT client_nm, canopy_breach, current_sys, platform_name, hull_stat, status_name, color_name, notes, case_created, rev_date, rev_stat_text, COALESCE(seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
 FROM cases AS c
-    JOIN case_seal AS cs ON cs.case_ID = c.case_ID
-    JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
-    JOIN review_info as ri on ri.caseID = c.case_ID
-    JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
-    JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
-    JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
-    LEFT JOIN sealsCTI as ss on ss.seal_ID = ri.reviewer
+JOIN case_seal AS cs ON cs.case_ID = c.case_ID
+JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
+JOIN review_info as ri on ri.caseID = c.case_ID
+JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
+JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
+JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
+JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
+LEFT JOIN sealsCTI as ss on ss.seal_ID = ri.reviewer
 WHERE c.case_ID = ?;");
 $stmtCaseInfo->bind_param("i", $beingManaged);
 $stmtCaseInfo->execute();
 $resultCaseInfo = $stmtCaseInfo->get_result();
 $stmtCaseInfo->close();
 if ($resultCaseInfo->num_rows === 0) {
-  Redirect::to('cases-list.php');
+  header('Location: cases-list.php');
+  die();
 }
 
 //All Assigned Seals
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
 AS
 (
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
 )
 SELECT COALESCE(seal_name, CONCAT('SEAL ID ', seal_kf_id), 'MISSING INFORMATION') AS seal_name, dispatch, support, self_dispatch
 FROM case_assigned AS ca
-    LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
+LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
 WHERE case_ID = ?;");
 $stmtAssigned->bind_param("i", $beingManaged);
 $stmtAssigned->execute();
@@ -106,16 +104,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
     </tr>
   </thead>
   <tbody>
-    <?php
-    while ($rowCaseInfo = $resultCaseInfo->fetch_assoc()) {
-      echo '<tr>
-          <td>' . $rowCaseInfo["client_nm"] . '</td>
-          <td>' . $rowCaseInfo["current_sys"] . '</td>
-          <td>' . $rowCaseInfo["platform_name"] . '</td>
-          <td>' . $rowCaseInfo["case_created"] . '</td>
-         </tr>';
-
-    ?>
+    <?php while ($rowCaseInfo = $resultCaseInfo->fetch_assoc()) { ?>
+      <tr>
+        <td><?= $rowCaseInfo["client_nm"] ?></td>
+        <td><?= $rowCaseInfo["current_sys"] ?></td>
+        <td><?= $rowCaseInfo["platform_name"] ?></td>
+        <td><?= $rowCaseInfo["case_created"] ?></td>
+      </tr>
   </tbody>
 </table>
 <br>
@@ -130,20 +125,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
     </tr>
   </thead>
   <tbody>
-    <?php
-      echo '<tr>';
-      if ($rowCaseInfo["canopy_breach"] == 0) {
-        echo '<td>Intact</td>';
-      } elseif ($rowCaseInfo["canopy_breach"] == 1) {
-        echo '<td>Broken</td>';
-      } else {
-        echo '<td>ERROR!</td>';
-      }
-      echo '<td>' . $rowCaseInfo["hull_stat"] . '</td>
-        <td>' . $rowCaseInfo["color_name"] . '</td>
-        <td>' . $rowCaseInfo["status_name"] . '</td>
-       </tr>';
-    ?>
+    <tr>
+      <?= $rowCaseInfo["canopy_breach"] == 0 ? '<td>Intact</td>' : '<td>Broken</td>'; ?>
+      <td><?= $rowCaseInfo["hull_stat"] ?></td>
+      <td><?= $rowCaseInfo["color_name"] ?></td>
+      <td><?= $rowCaseInfo["status_name"] ?></td>
+    </tr>
   </tbody>
 </table>
 <br>
@@ -155,11 +142,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
     </tr>
   </thead>
   <tbody>
-    <?php
-      echo '<tr>
-        <td>' . $rowCaseInfo["notes"] . '</td>
-     </tr>';
-    ?>
+    <tr>
+      <td><?= $rowCaseInfo["notes"] ?></td>
+    </tr>
   </tbody>
 </table>
 <br>
@@ -173,17 +158,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
     </tr>
   </thead>
   <tbody>
-  <?php
-      echo '<td>' . $rowCaseInfo["reviewer"] . '</td>
-    <td>' . $rowCaseInfo["rev_stat_text"] . '</td>
-    <td>' . $rowCaseInfo["rev_date"] . '</td>
-   </tr>';
-    }
-    $resultCaseInfo->free();
-
-  ?>
+    <tr>
+      <td><?= $rowCaseInfo["reviewer"] ?></td>
+      <td><?= $rowCaseInfo["rev_stat_text"] ?></td>
+      <td><?= $rowCaseInfo["rev_date"] ?></td>
+    </tr>
   </tbody>
 </table>
+<?php }
+    $resultCaseInfo->free();
+?>
 <br>
 <h3>Responder Information</h3>
 <table class="table table-hover table-dark table-responsive-md table-bordered table-striped">
@@ -200,24 +184,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
       $field1name = $rowAssigned["seal_name"];
       $field2name = $rowAssigned["dispatch"];
       $field3name = $rowAssigned["support"];
-      $field4name = $rowAssigned["self_dispatch"];
-      echo '<tr>
-             <td>' . $field1name . '</td>';
-      if ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 0) {
-        echo '<td>Primary Seal</td>';
-      } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 0) {
-        echo '<td>Dispatcher</td>';
-      } elseif ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 1) {
-        echo '<td>Supporting Seal</td>';
-      } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 1) {
-        echo '<td>Supporting Dispatcher</td>';
-      }
-      if ($rowAssigned["self_dispatch"] == 0) {
-        echo '<td>No</td>';
-      } else {
-        echo '<td>Yes</td>';
-      }
-      echo '</tr>';
+      $field4name = $rowAssigned["self_dispatch"]; ?>
+      <tr>
+        <td><?= $field1name ?></td>
+        <?php if ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 0) { ?>
+          <td>Primary Seal</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 0) { ?>
+          <td>Dispatcher</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 0 && $rowAssigned["support"] == 1) { ?>
+          <td>Supporting Seal</td>
+        <?php } elseif ($rowAssigned["dispatch"] == 1 && $rowAssigned["support"] == 1) { ?>
+          <td>Supporting Dispatcher</td>
+        <?php }
+        echo $rowAssigned["self_dispatch"] == 0 ? "<td>No</td>" : "<td>Yes</td>"; ?>
+      </tr>
+    <?php
     }
     $resultAssigned->free();
     ?>
@@ -252,5 +233,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
 <br>
 <p><a href="my-cases.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
 <br>
-<?php
-require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php';
+<?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

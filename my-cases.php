@@ -32,6 +32,24 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['port']);
 
 //Get All Paperwork
+$stmt = $mysqli->prepare("WITH sealsCTI
+AS
+(
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
+)
+
+SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf
+FROM cases AS c
+JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
+INNER JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
+INNER JOIN sealsCTI AS sc ON sc.seal_ID = ca.seal_kf_id
+JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
+WHERE seal_ID = ? AND case_stat != 8 GROUP BY c.case_ID");
+$stmt->bind_param("i", $user->data()->id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 <h2>Welcome, <?= echousername($user->data()->id); ?>. Here are the cases you've been on...</h2>
 <p><a href="https://hullseals.space/seal-links/" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
@@ -50,24 +68,6 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
   </thead>
   <tbody>
     <?php
-    $stmt = $mysqli->prepare("WITH sealsCTI
-    AS
-    (
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
-    )
-
-    SELECT c.case_ID, client_nm, current_sys, platform_name, case_created, hs_kf
-    FROM cases AS c
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
-    INNER JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
-    INNER JOIN sealsCTI AS sc ON sc.seal_ID = ca.seal_kf_id
-    JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
-    WHERE seal_ID = ? AND case_stat != 8 GROUP BY c.case_ID");
-    $stmt->bind_param("i", $user->data()->id);
-    $stmt->execute();
-    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
       $field1name = $row["case_ID"];
       $field2name = $row["client_nm"];
@@ -80,11 +80,7 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
         <td><?= $field3name ?></td>
         <td><?= $field4name ?></td>
         <td><?= $field5name ?></td>
-        <?php if ($row["hs_kf"] == 2) {
-          echo  '<td><a href="my-fisher-review.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
-        } else {
-          echo  '<td><a href="my-case-review.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>';
-        } ?>
+        <?= $row["hs_kf"] == 2 ? '<td><a href="my-fisher-review.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>' : '<td><a href="my-case-review.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>'; ?>
       </tr>
     <?php }
     $result->free();

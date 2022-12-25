@@ -79,21 +79,16 @@ GROUP BY c.case_ID");
       $field4name = $row["platform_name"];
       $field5name = $row["case_created"];
       $field6name = $row["seal_name"]; ?>
-    <tr>
-    <td><?= $field1name ?></td>
-    <td><?= $field2name ?></td>
-    <td><?= $field6name ?></td>
-    <td><?= $field3name ?></td>
-    <td><?= $field4name ?></td>
-    <td><?= $field5name ?></td>
-    <?php
-      if ($row["hs_kf"] == 2) {
-        echo  '<td><a href="fisher-review.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>';
-      } else {
-        echo  '<td><a href="case-review.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>';
-      }
-      echo '</tr>';
-    }
+      <tr>
+        <td><?= $field1name ?></td>
+        <td><?= $field2name ?></td>
+        <td><?= $field6name ?></td>
+        <td><?= $field3name ?></td>
+        <td><?= $field4name ?></td>
+        <td><?= $field5name ?></td>
+        <?= $row["hs_kf"] == 2 ? '<td><a href="fisher-review.php?cne=' . $field1name . '" class="btn btn-info active">Review KF Case</a></td>' : '<td><a href="case-review.php?cne=' . $field1name . '" class="btn btn-warning active">Review Seal Case</a></td>'; ?>
+      </tr>
+    <?php }
     $result->free();
     ?>
   </tbody>
