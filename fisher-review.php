@@ -16,6 +16,7 @@ if (!securePage($_SERVER['PHP_SELF'])) {
 }
 
 if (!isset($_GET['cne'])) {
+  usError("No Case Specified.");
   header('Location: cases-list.php');
   die();
 }
@@ -33,26 +34,27 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
 $stmtCaseInfo = $mysqli->prepare("WITH sealsCTI
 AS
 (
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
 )
 SELECT client_nm, current_sys, current_planet, site_coords, platform_name, status_name, color_name, notes, case_created, rev_date, rev_stat_text, COALESCE(seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer, rev_notes
 FROM cases AS c
-    JOIN case_kf AS cs ON cs.case_ID = c.case_ID
-    JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
-    JOIN review_info as ri on ri.caseID = c.case_ID
-    JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
-    JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
-    JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
-    LEFT JOIN sealsCTI as ss on ss.seal_ID = ri.reviewer
+JOIN case_kf AS cs ON cs.case_ID = c.case_ID
+JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
+JOIN review_info as ri on ri.caseID = c.case_ID
+JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
+JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
+JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
+JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
+LEFT JOIN sealsCTI as ss on ss.seal_ID = ri.reviewer
 WHERE c.case_ID = ?");
 $stmtCaseInfo->bind_param("i", $beingManaged);
 $stmtCaseInfo->execute();
 $resultCaseInfo = $stmtCaseInfo->get_result();
 $stmtCaseInfo->close();
 if ($resultCaseInfo->num_rows === 0) {
+  usError("No Case Details Found");
   header('Location: cases-list.php');
   die();
 }
@@ -61,20 +63,20 @@ if ($resultCaseInfo->num_rows === 0) {
 $stmtAssigned = $mysqli->prepare("WITH sealsCTI
 AS
 (
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
 )
 SELECT COALESCE(seal_name, CONCAT('SEAL ID ', seal_kf_id), 'MISSING INFORMATION') AS seal_name, dispatch, support, self_dispatch
 FROM case_assigned AS ca
-    LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
+LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
 WHERE case_ID = ?;");
 $stmtAssigned->bind_param("i", $beingManaged);
 $stmtAssigned->execute();
 $resultAssigned = $stmtAssigned->get_result();
 $stmtAssigned->close();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
+if (($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") && (hasPerm([7, 8, 9, 10, 19], $user->data()->id))) {
   foreach ($_REQUEST as $key => $value) {
     $lore[$key] = strip_tags(stripslashes(str_replace(["'", '"'], '', $value)));
   }
@@ -82,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
   $stmt->bind_param('iiss', $beingManaged, $user->data()->id, $lore['notes'], $lgd_ip);
   $stmt->execute();
   $stmt->close();
+  usSuccess("Case Marked for Deletion");
   header("Location: cases-list.php");
   die();
 }
@@ -233,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "delCase") {
           <form action="?del&cne=<?= $beingManaged; ?>" method="post">
             <input hidden type="text" name="formtype" value="delCase">
             <div class="input-group mb-3">
-              <textarea class="form-control" name="notes" placeholder="Reason for Deletion (Required)" required rows="5" style="color:black;"><?= $data['notes'] ?? '' ?></textarea>
+              <textarea class="form-control" name="notes" pattern="[\x20-\x7A]+" minlength="10" placeholder="Reason for Deletion (Required)" required rows="5" style="color:black;"><?= $data['notes'] ?? '' ?></textarea>
             </div>
             <div class="modal-footer">
               <button class="btn btn-primary" type="submit">Submit</button><button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>

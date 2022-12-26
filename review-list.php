@@ -10,7 +10,7 @@ $useIP = 0; //1 if Yes, 0 if No.
 
 //If you have any custom scripts, CSS, etc, you MUST declare them here.
 //They will be inserted at the bottom of the <head> section.
-$customContent = ' <script>
+$customContent = '<script>
  $(document).ready(function() {
  $(\'#PaperworkList\').DataTable({
    "order": [[ 0, \'desc\' ]]

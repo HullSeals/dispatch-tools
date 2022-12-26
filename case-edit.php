@@ -16,6 +16,7 @@ if (!securePage($_SERVER['PHP_SELF'])) {
 }
 
 if (!isset($_GET['cne'])) {
+  usError("No Case Specified.");
   header('Location: cases-list.php');
   die();
 }
@@ -50,18 +51,19 @@ while ($color = $resColor->fetch_assoc()) {
 //All Case Info
 $stmtCaseInfo = $mysqli->prepare("SELECT client_nm, canopy_breach, current_sys, platform_name, hull_stat, status_name, color_name, notes, case_created, platform_id, rev_notes, note_worth, review_status, db_update
 FROM cases AS c
-    JOIN case_seal AS cs ON cs.case_ID = c.case_ID
-    JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
-    JOIN review_info as ri on ri.caseID = c.case_ID
-    JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
-    JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
+JOIN case_seal AS cs ON cs.case_ID = c.case_ID
+JOIN case_history AS ch ON ch.ch_ID = c.last_ch_id
+JOIN review_info as ri on ri.caseID = c.case_ID
+JOIN lookups.status_lu AS slu ON slu.status_id = ch.case_stat
+JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
+JOIN lookups.case_color_lu AS ccl ON ccl.color_id = ch.code_color
 WHERE c.case_ID = ?;");
 $stmtCaseInfo->bind_param("i", $beingManaged);
 $stmtCaseInfo->execute();
 $resultCaseInfo = $stmtCaseInfo->get_result();
 $stmtCaseInfo->close();
 if ($resultCaseInfo->num_rows === 0) {
+  usError("No Case Details Found");
   header('Location: cases-list.php');
   die();
 }
@@ -82,20 +84,56 @@ $stmtAssigned->execute();
 $resultAssigned = $stmtAssigned->get_result();
 $stmtAssigned->close();
 
+$validationErrors = 0;
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") {
   foreach ($_REQUEST as $key => $value) {
     $lore[$key] = strip_tags(stripslashes(str_replace(["'", '"'], '', $value)));
   }
-  $stmt = $mysqli->prepare('CALL spUpdateCase(?,?,?,?,?,?,?,?,?,?,?)');
-  $stmt->bind_param('iiissiiiiss', $beingManaged, $lore['status'], $lore['platform'], $lore['client_nm'], $lore['curr_sys'], $lore['canopy_status'], $lore['hull'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
-  $stmt->execute();
-  $stmt->close();
-  $stmt2 = $mysqli->prepare('CALL spCaseReviewUpdate(?,?,?,?,?,?,?)');
-  $stmt2->bind_param('iiisiis', $beingManaged, $lore['review_status'], $user->data()->id, $lore['revnotes'], $lore['noteworthy'], $lore['dbupdate'], $lgd_ip);
-  $stmt2->execute();
-  $stmt2->close();
-  header("Location: ?cne=$beingManaged");
-  die();
+  if (!isset($lore['review_status'])) {
+    usError("Error! No review status set! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['platform'])) {
+    usError("Error! No platform set! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['client_nm']) || strlen($data['client_nm']) > 45) {
+    usError("Error in client name! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['curr_sys']) || strlen($data['curr_sys']) > 100) {
+    usError("Error in system name! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['canopy_status'])) {
+    usError("Error! No canopy status set! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['hull']) || (($data['hull'] > 100 || $data['hull'] < 0))) {
+    usError("Error! No hull percentage set! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['color'])) {
+    usError("Error! No case color set! Please try again.");
+    $validationErrors += 1;
+  }
+  if (!isset($lore['notes'])) {
+    usError("Error! No notes set! Please try again.");
+    $validationErrors += 1;
+  }
+  if ($validationErrors == 0) {
+    $stmt = $mysqli->prepare('CALL spUpdateCase(?,?,?,?,?,?,?,?,?,?,?)');
+    $stmt->bind_param('iiissiiiiss', $beingManaged, $lore['status'], $lore['platform'], $lore['client_nm'], $lore['curr_sys'], $lore['canopy_status'], $lore['hull'], $lore['color'], $user->data()->id, $lore['notes'], $lgd_ip);
+    $stmt->execute();
+    $stmt->close();
+    $stmt2 = $mysqli->prepare('CALL spCaseReviewUpdate(?,?,?,?,?,?,?)');
+    $stmt2->bind_param('iiisiis', $beingManaged, $lore['review_status'], $user->data()->id, $lore['revnotes'], $lore['noteworthy'], $lore['dbupdate'], $lgd_ip);
+    $stmt2->execute();
+    $stmt2->close();
+    usSuccess("Case Edits Saved Successfully");
+    header("Location: ?cne=$beingManaged");
+    die();
+  }
 }
 ?>
 <form action="?updateinfo&cne=<?= $beingManaged; ?>" method="post">
@@ -122,8 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
       <?php
       while ($rowCaseInfo = $resultCaseInfo->fetch_assoc()) { ?>
         <tr>
-          <td><input class="form-control" name="client_nm" placeholder="Client Name" required type="text" value="<?= $rowCaseInfo["client_nm"] ?>"></td>
-          <td><input class="form-control" name="curr_sys" placeholder="System" required type="text" value="<?= $rowCaseInfo["current_sys"] ?>"></td>
+          <td><input class="form-control" name="client_nm" pattern="[\x20-\x7A]+" minlength="3" placeholder="Client Name" required type="text" value="<?= $rowCaseInfo["client_nm"] ?>"></td>
+          <td><input class="form-control" name="curr_sys" pattern="[\x20-\x7A]+" minlength="3" placeholder="System" required type="text" value="<?= $rowCaseInfo["current_sys"] ?>"></td>
           <td>
             <select class="custom-select" id="inputGroupSelect03" name="platform" required>
               <?php foreach ($platformList as $platformId => $platformName) {
@@ -155,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
             <option value="1" <?= $rowCaseInfo["canopy_breach"] == 1 ? "selected" : ""; ?>>Broken</option>
           </select>
         </td>
-        <td><input class="form-control" max="100" min="1" name="hull" placeholder="Starting Hull %" required type="number" value="<?= $rowCaseInfo["hull_stat"] ?>"></td>
+        <td><input class="form-control" max="100" min="0" pattern="[0-9]" name="hull" placeholder="Starting Hull %" required type="number" value="<?= $rowCaseInfo["hull_stat"] ?>"></td>
         <td>
           <select class="custom-select" id="inputGroupSelect01" name="color" required>
             <?php foreach ($colorList as $colorId => $colorName) {
@@ -185,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     </thead>
     <tbody>
       <tr>
-        <td><textarea minlength="10" class="form-control" name="notes" rows="5"><?= $rowCaseInfo["notes"] ?></textarea>
+        <td><textarea minlength="10" pattern="[\x20-\x7F]+" class="form-control" name="notes" rows="5"><?= $rowCaseInfo["notes"] ?></textarea>
         </td>
       </tr>
     </tbody>
@@ -233,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     </thead>
     <tbody>
       <tr>
-        <td><textarea minlength="10" class="form-control" name="revnotes" rows="5"><?= $rowCaseInfo["rev_notes"] ?></textarea>
+        <td><textarea minlength="10" pattern="[\x20-\x7F]+" class="form-control" name="revnotes" rows="5"><?= $rowCaseInfo["rev_notes"] ?></textarea>
         </td>
       </tr>
     <?php
