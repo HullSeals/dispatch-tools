@@ -52,7 +52,6 @@ WHERE case_stat != 8 AND review_status != 3
 GROUP BY c.case_ID DESC");
 $stmt->execute();
 $result = $stmt->get_result();
-
 ?>
 <h2>Welcome, <?= echousername($user->data()->id); ?>.</h2>
 <p>Here is the review status of filed cases... <a href="." class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>

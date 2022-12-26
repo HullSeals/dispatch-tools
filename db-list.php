@@ -32,6 +32,26 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['port']);
 
 //Get All Paperwork
+$stmt = $mysqli->prepare("WITH sealsCTI
+AS
+(
+SELECT MIN(ID), seal_ID, seal_name
+FROM sealsudb.staff
+GROUP BY seal_ID
+)
+SELECT c.case_ID, client_nm, case_created, hs_kf, rev_stat_text, COALESCE(ss.seal_name, (SELECT ss.seal_name FROM case_assigned WHERE case_stat != 8 AND (dispatch = TRUE AND support = FALSE AND c.case_ID = case_ID)), 'ERROR') AS seal_name, COALESCE(ss2.seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
+FROM cases AS c
+JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
+JOIN review_info as ri on ri.caseID = c.case_ID
+LEFT JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
+LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
+LEFT JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
+JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
+LEFT JOIN sealsCTI as ss2 on ss2.seal_ID = ri.reviewer
+WHERE db_update = 1
+GROUP BY c.case_ID DESC;");
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 <h2>Welcome, <?= echousername($user->data()->id); ?>.</h2>
 <p>The following cases need DB updates... <a href="review-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
@@ -51,26 +71,6 @@ $mysqli = new mysqli($db['server'], $db['user'], $db['pass'], 'records', $db['po
   </thead>
   <tbody>
     <?php
-    $stmt = $mysqli->prepare("WITH sealsCTI
-AS
-(
-    SELECT MIN(ID), seal_ID, seal_name
-    FROM sealsudb.staff
-    GROUP BY seal_ID
-)
-SELECT c.case_ID, client_nm, case_created, hs_kf, rev_stat_text, COALESCE(ss.seal_name, (SELECT ss.seal_name FROM case_assigned WHERE case_stat != 8 AND (dispatch = TRUE AND support = FALSE AND c.case_ID = case_ID)), 'ERROR') AS seal_name, COALESCE(ss2.seal_name, CONCAT('SEAL ID', reviewer), 'Not Assigned') as reviewer
-FROM cases AS c
-    JOIN lookups.platform_lu AS plu ON plu.platform_id = c.platform
-    JOIN review_info as ri on ri.caseID = c.case_ID
-    LEFT JOIN case_assigned AS ca ON ca.case_ID = c.case_ID
-    LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
-    LEFT JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
-    JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
-    LEFT JOIN sealsCTI as ss2 on ss2.seal_ID = ri.reviewer
-WHERE db_update = 1
-GROUP BY c.case_ID DESC;");
-    $stmt->execute();
-    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
       $field1name = $row["case_ID"];
       $field2name = $row["client_nm"];
