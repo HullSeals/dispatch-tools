@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 //Declare Title, Content, Author
 $pgAuthor = "David Sangrey";
-$pgContent = "Case Review System";
+$pgContent = "Database Update Cases";
 $useIP = 0; //1 if Yes, 0 if No.
 
 //If you have any custom scripts, CSS, etc, you MUST declare them here.
@@ -48,13 +48,13 @@ LEFT JOIN sealsCTI AS ss ON ss.seal_ID = ca.seal_kf_id
 LEFT JOIN case_history AS ch ON ch.ch_id = c.last_ch_id
 JOIN lookups.review_stat_lu as rsl on rsl.rev_stat_ID = ri.review_status
 LEFT JOIN sealsCTI as ss2 on ss2.seal_ID = ri.reviewer
-WHERE case_stat != 8 AND review_status != 3
-GROUP BY c.case_ID DESC");
+WHERE db_update = 1
+GROUP BY c.case_ID DESC;");
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
 <h2>Welcome, <?= echousername($user->data()->id); ?>.</h2>
-<p>Here is the review status of filed cases... <a href="." class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
+<p>The following cases need DB updates... <a href="review-list.php" class="btn btn-small btn-danger" style="float: right;">Go Back</a></p>
 <br>
 <br>
 <table class="table table-hover table-dark table-responsive-md table-bordered table-striped" id="PaperworkList">
@@ -92,6 +92,4 @@ $result = $stmt->get_result();
     ?>
   </tbody>
 </table>
-<br>
-<a href="db-list.php" class="btn btn-warning active">Database Update List</a>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>
