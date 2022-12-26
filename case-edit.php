@@ -97,11 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     usError("Error! No platform set! Please try again.");
     $validationErrors += 1;
   }
-  if (!isset($lore['client_nm']) || strlen($data['client_nm']) > 45) {
+  if (!isset($lore['client_nm']) || strlen($lore['client_nm']) > 45) {
     usError("Error in client name! Please try again.");
     $validationErrors += 1;
   }
-  if (!isset($lore['curr_sys']) || strlen($data['curr_sys']) > 100) {
+  if (!isset($lore['curr_sys']) || strlen($lore['curr_sys']) > 100) {
     usError("Error in system name! Please try again.");
     $validationErrors += 1;
   }
@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['formtype'] == "updateCase") 
     usError("Error! No canopy status set! Please try again.");
     $validationErrors += 1;
   }
-  if (!isset($lore['hull']) || (($data['hull'] > 100 || $data['hull'] < 0))) {
+  if (!isset($lore['hull']) || (($lore['hull'] > 100 || $lore['hull'] < 0))) {
     usError("Error! No hull percentage set! Please try again.");
     $validationErrors += 1;
   }
